@@ -4,12 +4,13 @@ using UnityEngine;
 using TFG;
 using UnityEngine.XR;
 using UnityEngine.InputSystem.XR;
+using UnityEditor.Experimental.GraphView;
 
 namespace TFG
 {
     /// clase con patrón Singleton que se encarga de almacenar referencias 
     /// a objetos importantes como la cabeza o el jugador
-  
+
     [AddComponentMenu("TFG/Manager")]
         public class GameManager : MonoBehaviour
         {
@@ -26,9 +27,13 @@ namespace TFG
             /// referencia a los Transform padres de estas cámaras
             public Transform leftMovement;
             public Transform rightMovement;
+      
 
         #endregion
-
+        private void Start()
+        {
+          
+        }
         void Awake()
         {
             // asociación Singleton
@@ -42,6 +47,8 @@ namespace TFG
             center = GameObject.FindGameObjectWithTag("centerCamera").GetComponent<Camera>();
             leftMovement = GameObject.FindGameObjectWithTag("Lefteyetransform").GetComponent<Transform>();
             rightMovement= GameObject.FindGameObjectWithTag("Righteyetransform").GetComponent<Transform>();
+
+ 
         }
 
         void Update()

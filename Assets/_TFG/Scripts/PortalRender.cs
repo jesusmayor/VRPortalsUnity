@@ -39,7 +39,7 @@ namespace TFG
             // destino en su vista de cámara.
             if (Camera.current == gmref.lefteye)
             {
-                Debug.Log("Left");
+                //Debug.Log("Left");
                 //Calculamos la posición y rotación relativa de la cámara auxiliar respecto a la cámara principal del ojo izquierdo.
                 if (TryGetXRNodeOffsetEyeVector(out Vector3 leftEyePos,out Vector3 rightEyePos)) //La posición debe ser obtenida mediante el API de Unity.
                 {
@@ -60,7 +60,7 @@ namespace TFG
             }
             else if (Camera.current == gmref.righteye)
             {
-                Debug.Log("Right");
+                //Debug.Log("Right");
                 //Calculamos la posición y rotación relativa de la cámara auxiliar respecto a la cámara principal del ojo derecho.
                 if (TryGetXRNodeOffsetEyeVector(out Vector3 leftEyePos, out Vector3 rightEyePos)) //La posición debe ser obtenida mediante el API de Unity.
                 {
