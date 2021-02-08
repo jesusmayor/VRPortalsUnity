@@ -13,8 +13,7 @@ public class Graph<T> where T : GraphNode, new()
         connections = new List<GraphConnection<T>>();
     }
 
-    
-    
+   
     public void AddNode(GameObject prefab)
     {
         GraphNode node = new GraphNode(prefab);
@@ -82,8 +81,5 @@ public class Graph<T> where T : GraphNode, new()
         GraphConnection<T> connection = new GraphConnection<T>(nodeA, nodeB);
         return FindConnection(connection);
     }
-
-
-
 }
 

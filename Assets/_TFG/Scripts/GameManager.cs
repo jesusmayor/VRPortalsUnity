@@ -47,8 +47,6 @@ namespace TFG
             center = GameObject.FindGameObjectWithTag("centerCamera").GetComponent<Camera>();
             leftMovement = GameObject.FindGameObjectWithTag("Lefteyetransform").GetComponent<Transform>();
             rightMovement= GameObject.FindGameObjectWithTag("Righteyetransform").GetComponent<Transform>();
-
- 
         }
 
         void Update()

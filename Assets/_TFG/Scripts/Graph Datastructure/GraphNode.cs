@@ -47,11 +47,4 @@ public class GraphNode
     {
         return connectedNodes;
     }
-
-    public void connectPortals(TFG.PortalRender entryPortal, TFG.PortalRender leavePortal )
-    {
-        //entryPortal.connectedPortal = leavePortal;
-
-    }
-
 }
