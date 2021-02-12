@@ -7,7 +7,7 @@ using UnityEngine;
 public class GraphNode
 {
     protected List<GraphNode> connectedNodes;
-    GameObject prefab;
+    GameObject prefab; //Not used yet
     public Transform entryPortal;
     public Transform leavePortal;
 

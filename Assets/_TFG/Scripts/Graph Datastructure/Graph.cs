@@ -58,7 +58,7 @@ public class Graph<T> where T : GraphNode, new()
 
     public GraphConnection<T> FindConnection(GraphConnection<T> connection)
     {
-        foreach (GraphConnection<T> existingConnection in connections) //TODO - this would be better served by a custom equality operator?
+        foreach (GraphConnection<T> existingConnection in connections)
         {
             if (existingConnection.nodeA == connection.nodeA &&
                 existingConnection.nodeB == connection.nodeB)

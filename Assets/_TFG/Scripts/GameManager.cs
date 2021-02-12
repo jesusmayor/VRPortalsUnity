@@ -27,9 +27,7 @@ namespace TFG
             /// referencia a los Transform padres de estas cámaras
             public Transform leftMovement;
             public Transform rightMovement;
-      
-
-        #endregion
+            #endregion
         private void Start()
         {
           
