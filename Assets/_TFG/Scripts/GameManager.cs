@@ -30,7 +30,7 @@ namespace TFG
             #endregion
         private void Start()
         {
-          
+
         }
         void Awake()
         {

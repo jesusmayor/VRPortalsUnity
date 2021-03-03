@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Graph<T> where T : GraphNode, new()
 {
-    protected List<GraphNode> nodes;
+    protected List<GraphNode> nodes; //Not used
     protected List<GraphConnection<T>> connections;
 
     public Graph()
@@ -13,50 +13,60 @@ public class Graph<T> where T : GraphNode, new()
         connections = new List<GraphConnection<T>>();
     }
 
-   
-    public void AddNode(GameObject prefab)
-    {
-        GraphNode node = new GraphNode(prefab);
-        nodes.Add(node);
-    }
-
-    public List<GraphNode> GetNodes()
+    public List<GraphNode> getNodes() 
     {
         return nodes;
     }
 
-    public List<GraphConnection<T>> GetConnections()
+    public int getNumberOfNodes()
+    {
+        return this.getNodes().Count;
+    }
+
+    public void addNode(GraphNode node)
+    {
+        nodes.Add(node);
+    }
+
+    public List<GraphConnection<T>> getConnections()
     {
         return connections;
     }
 
-    public void ConnectNodes(T nodeA, T nodeB)
+    public bool connectNodes(T nodeA, T nodeB)
     {
         GraphConnection<T> connection = new GraphConnection<T>(nodeA, nodeB);
-        connection.connectPortals();
-        if (nodeA != nodeB && FindConnection(connection) == null)
+        if (nodeA != nodeB && findConnection(connection) == null)
         {
-            nodeA.AddConnectedNode(nodeB);
-            nodeB.AddConnectedNode(nodeA);
+            nodeA.addConnectedNode(nodeB);
+            nodeB.addConnectedNode(nodeA);
             connections.Add(connection);
         }
+        else
+            return false;
+        return true;
     }
 
-    public void DisconnectNodes(GraphConnection<T> connection)
+    public bool disconnectNodes(GraphConnection<T> connection) //Return boolean
     {
-        connection.disconnectPortals();
-        connections.Remove(FindConnection(connection));
-        connection.nodeA.RemoveConnectedNode(connection.nodeB);
-        connection.nodeB.RemoveConnectedNode(connection.nodeA);
+        if (connection != null)
+        {
+            connections.Remove(findConnection(connection));
+            connection.nodeA.removeConnectedNode(connection.nodeB);
+            connection.nodeB.removeConnectedNode(connection.nodeA);
+        }
+        else
+            return false;
+        return true;
     }
 
-    public void DisconnectNodes(T nodeA, T nodeB)
+    public void disconnectNodes(T nodeA, T nodeB)
     {
         GraphConnection<T> connection = new GraphConnection<T>(nodeA, nodeB);
-        DisconnectNodes(connection);
+        disconnectNodes(connection);
     }
 
-    public GraphConnection<T> FindConnection(GraphConnection<T> connection)
+    public GraphConnection<T> findConnection(GraphConnection<T> connection)
     {
         foreach (GraphConnection<T> existingConnection in connections)
         {
@@ -76,10 +86,10 @@ public class Graph<T> where T : GraphNode, new()
         return null;
     }
 
-    public GraphConnection<T> FindConnection(T nodeA, T nodeB)
+    public GraphConnection<T> findConnection(T nodeA, T nodeB)
     {
         GraphConnection<T> connection = new GraphConnection<T>(nodeA, nodeB);
-        return FindConnection(connection);
+        return findConnection(connection);
     }
 }
 
