@@ -12,7 +12,7 @@ public class GraphNode
     [SerializeField]
     public Transform leavePortal;
 
-    protected GameObject parent;
+    public GameObject parent;
     //The world coordinates could probably be just the X axis value
     protected Vector3 currentWorldCoordinates;//Store here the global position where the node should be instantiated (Basically its (0,0,0) coordinates)
     protected int rightTurnIndex;//Store where the right hallway starts
@@ -67,20 +67,20 @@ public class GraphNode
 
     public void render()//Render this node
     {
-        if(this.parent.activeSelf == false)//If node was unrendered, render it, but dont build it again
+        if (parent == null)//If parent is null, this node was unrendered previously so we need to create the parent gameObject
         {
-            this.parent.SetActive(true);
+            createParentGameObject();
         }
-        else //Build the node from zero
-        {
-            createstraightHallway(currentWorldCoordinates, straightHallwayLength);
-            turn("right", rightHallwayLength);
-            turn("left", leftHallwayLength);
-        }
+        
+        createstraightHallway(currentWorldCoordinates, straightHallwayLength);
+        turn("right", rightHallwayLength);
+        turn("left", leftHallwayLength);
+        Debug.Log(this.straightHallwayLength);
     }
-    public void unrender()//Unrender this node, could probably destroy the gameObject
+    public void unrender()//Unrender this node
     {
-        this.parent.SetActive(false);
+        Object.Destroy(this.parent);
+        parent = null;
     }
     private void createstraightHallway(Vector3 pos, int length)
     {
@@ -90,7 +90,7 @@ public class GraphNode
         for (int i = 0; i < length; i++)//Iterate over the number of floors and instantiate them
         {
             //Create floor instance
-            createFloor(currentPos);
+            createFloor(currentPos, 0.5f);
             //Move forward 1 time
             currentPos.z++;
         }
@@ -115,7 +115,7 @@ public class GraphNode
         for (int i = 0; i < length; i++)//Iterate over the number of floors and instantiate them
         {
             //Create floor instance
-            createFloor(currentPos);
+            createFloor(currentPos,0.5f);
             if (direction == "right")
             {
                 currentPos.x++;
@@ -127,11 +127,33 @@ public class GraphNode
         }
     }
 
-    private void createFloor(Vector3 pos)//Create vertices and triangles arrays to make a 1 by 1 square and instantiate it at the position given
+    private void createFloor(Vector3 pos, float shrinkRatio)//Create vertices and triangles arrays to make a 1^3 meter cube and instantiate it at the position given
     {
-        Vector3[] vertices = new Vector3[] { new Vector3(pos.x, pos.y, pos.z), new Vector3(pos.x, pos.y, pos.z + 1), new Vector3(pos.x + 1, pos.y, pos.z), new Vector3(pos.x + 1, pos.y, pos.z + 1) };
+        Vector3[] vertices = new Vector3[] {
+            new Vector3(pos.x,pos.y - 1 + shrinkRatio,pos.z),
+            new Vector3(pos.x +1 ,pos.y - 1 + shrinkRatio,pos.z),
+            new Vector3(pos.x + 1,pos.y - 1 + 1,pos.z),
+            new Vector3(pos.x,pos.y - 1 + 1,pos.z),
+            new Vector3(pos.x ,pos.y - 1 + 1,pos.z + 1),
+            new Vector3(pos.x + 1,pos.y - 1 + 1,pos.z + 1),
+            new Vector3(pos.x + 1,pos.y - 1 + shrinkRatio,pos.z + 1),
+            new Vector3(pos.x,pos.y - 1 + shrinkRatio,pos.z + 1),
+            };
 
-        int[] triangles = new int[] { 0, 1, 2, 2, 1, 3 };
+        int[] triangles = {
+            0, 2, 1, //face front
+	        0, 3, 2,
+            2, 3, 4, //face top
+	        2, 4, 5,
+            1, 2, 5, //face right
+	        1, 5, 6,
+            0, 7, 4, //face left
+	        0, 4, 3,
+            5, 4, 7, //face back
+	        5, 7, 6,
+            0, 6, 7, //face bottom
+	        0, 1, 6
+        };
         GameObject floor = createMeshObject();
         createMesh(floor, vertices, triangles);
     }

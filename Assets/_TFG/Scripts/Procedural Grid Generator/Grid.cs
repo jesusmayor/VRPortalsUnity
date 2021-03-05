@@ -19,7 +19,7 @@ public class Grid : MonoBehaviour
 
     private Graph<GraphNode> generateMaze(int length)//Control hallway lengths to make sense
     {
-        Vector3 currentGlobalPosition = Vector3.zero;
+        Vector3 currentGlobalPosition = new Vector3(0,0,0);
         Graph<GraphNode> maze = new Graph<GraphNode>();
         int[] nodeValues;
         for(int i = 0; i < length; i++)
@@ -101,9 +101,7 @@ public class Grid : MonoBehaviour
 
     private int generateRandomSideHallwayIndex(int straightHallwayLength)//Generate the point where the hallway turns, always less than the straight hallway length
     {
-        int resul;
-        resul = Random.Range(1,straightHallwayLength + 1); //Side hallways have to be instantiated between the first floor and the last one
-        return resul;
+        return Random.Range(2,straightHallwayLength + 1); //Side hallways have to be instantiated between the first floor and the last one
     }
 }
     
