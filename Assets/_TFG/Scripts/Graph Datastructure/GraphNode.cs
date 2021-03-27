@@ -12,7 +12,7 @@ public class GraphNode
     [SerializeField]
     public Transform leavePortal;
 
-    public GameObject parent;
+    protected GameObject parent;
     //The world coordinates could probably be just the X axis value
     protected Vector3 currentWorldCoordinates;//Store here the global position where the node should be instantiated (Basically its (0,0,0) coordinates)
     protected int rightTurnIndex;//Store where the right hallway starts
@@ -20,7 +20,7 @@ public class GraphNode
     protected int leftTurnIndex;//Store where the left hallway starts
     protected int leftHallwayLength;//Store the left hallway length
     protected int straightHallwayLength;//Store the straight hallway length
-    protected Color color;//Do I generate it randomnly or do I add it to the constructor?
+    protected Color color;//Do I generate it randomly or do I add it to the constructor?
 
 
     public GraphNode()
@@ -67,7 +67,7 @@ public class GraphNode
 
     public void render()//Render this node
     {
-        if (parent == null)//If parent is null, this node was unrendered previously so we need to create the parent gameObject
+        if (parent == null)//If parent is null, this node was unrendered previously so we need to create the parent gameObject before rendering it
         {
             createParentGameObject();
         }
@@ -75,7 +75,6 @@ public class GraphNode
         createstraightHallway(currentWorldCoordinates, straightHallwayLength);
         turn("right", rightHallwayLength);
         turn("left", leftHallwayLength);
-        Debug.Log(this.straightHallwayLength);
     }
     public void unrender()//Unrender this node
     {
@@ -129,6 +128,7 @@ public class GraphNode
 
     private void createFloor(Vector3 pos, float shrinkRatio)//Create vertices and triangles arrays to make a 1^3 meter cube and instantiate it at the position given
     {
+        //Substract 1 to every Y axis value to instantiate cubes below the player
         Vector3[] vertices = new Vector3[] {
             new Vector3(pos.x,pos.y - 1 + shrinkRatio,pos.z),
             new Vector3(pos.x +1 ,pos.y - 1 + shrinkRatio,pos.z),

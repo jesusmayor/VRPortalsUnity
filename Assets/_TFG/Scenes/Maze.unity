@@ -246,7 +246,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb5cf0c0bcfb89946a61762ad3e634c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mazeLength: 10
+  playerStartPoint: {x: 3, y: 3}
+  mazeLength: 1000
 --- !u!1001 &1931592850
 PrefabInstance:
   m_ObjectHideFlags: 0
