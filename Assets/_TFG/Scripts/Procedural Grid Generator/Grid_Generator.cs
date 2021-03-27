@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
-public class Grid : MonoBehaviour
+public class Grid_Generator : MonoBehaviour
 {
     public Vector2 playerStartPoint;
     public int mazeLength;
