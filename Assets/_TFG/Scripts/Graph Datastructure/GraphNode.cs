@@ -128,16 +128,16 @@ public class GraphNode
 
     private void createFloor(Vector3 pos, float shrinkRatio)//Create vertices and triangles arrays to make a 1^3 meter cube and instantiate it at the position given
     {
-        //Substract 1 to every Y axis value to instantiate cubes below the player
+        //Create the vertices and triangles arrays to create a square at (0,0,0) below the player
         Vector3[] vertices = new Vector3[] {
-            new Vector3(pos.x,pos.y - 1 + shrinkRatio,pos.z),
-            new Vector3(pos.x +1 ,pos.y - 1 + shrinkRatio,pos.z),
-            new Vector3(pos.x + 1,pos.y - 1 + 1,pos.z),
-            new Vector3(pos.x,pos.y - 1 + 1,pos.z),
-            new Vector3(pos.x ,pos.y - 1 + 1,pos.z + 1),
-            new Vector3(pos.x + 1,pos.y - 1 + 1,pos.z + 1),
-            new Vector3(pos.x + 1,pos.y - 1 + shrinkRatio,pos.z + 1),
-            new Vector3(pos.x,pos.y - 1 + shrinkRatio,pos.z + 1),
+            new Vector3(0,- 1 + shrinkRatio,0),
+            new Vector3(1 ,- 1 + shrinkRatio,0),
+            new Vector3(1,- 1 + 1,0),
+            new Vector3(0,- 1 + 1,0),
+            new Vector3(0,- 1 + 1,1),
+            new Vector3(1,- 1 + 1,1),
+            new Vector3(1,- 1 + shrinkRatio, 1),
+            new Vector3(0,- 1 + shrinkRatio,1),
             };
 
         int[] triangles = {
@@ -155,6 +155,8 @@ public class GraphNode
 	        0, 1, 6
         };
         GameObject floor = createMeshObject();
+        //Move the floor to the correct position
+        floor.transform.position += pos;
         createMesh(floor, vertices, triangles);
     }
 
