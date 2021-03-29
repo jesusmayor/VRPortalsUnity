@@ -28,7 +28,7 @@ public class GraphNode
         connectedNodes = new List<GraphNode>();
     }
 
-    public GraphNode(Vector3 startingPoint, int hallwayLength,int rightTurnIndex, int rightHallwayLength, int leftTurnIndex, int leftHallwayLength):this()
+    public GraphNode(Vector3 startingPoint, int hallwayLength, int rightTurnIndex, int rightHallwayLength, int leftTurnIndex, int leftHallwayLength) : this()
     {
         this.currentWorldCoordinates = startingPoint;
         this.straightHallwayLength = hallwayLength;
@@ -71,7 +71,7 @@ public class GraphNode
         {
             createParentGameObject();
         }
-        
+
         createstraightHallway(currentWorldCoordinates, straightHallwayLength);
         turn("right", rightHallwayLength);
         turn("left", leftHallwayLength);
@@ -103,18 +103,18 @@ public class GraphNode
         if (direction == "right")//If direction is right, set up coordinates to instantiate the right hallway
         {
             currentPos.x++;
-            currentPos.z = rightTurnIndex -1;
+            currentPos.z = rightTurnIndex - 1;
         }
         else if (direction == "left")//If direction is left, set up coordinates to instantiate the left hallway
         {
             currentPos.x--;
-            currentPos.z = leftTurnIndex -1;
+            currentPos.z = leftTurnIndex - 1;
         }
 
         for (int i = 0; i < length; i++)//Iterate over the number of floors and instantiate them
         {
             //Create floor instance
-            createFloor(currentPos,0.5f);
+            createFloor(currentPos, 0.5f);
             if (direction == "right")
             {
                 currentPos.x++;

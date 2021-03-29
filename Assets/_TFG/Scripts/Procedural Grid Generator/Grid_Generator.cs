@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
+//This class is used to generate all of the grid in the scene. It generates it depending on the workSpace of the user to keep him inside its limits.
 public class Grid_Generator : MonoBehaviour
 {
     public Vector2 playerStartPoint;
@@ -25,20 +26,19 @@ public class Grid_Generator : MonoBehaviour
         Graph<GraphNode> maze = generateMaze(mazeLength);
 
         Debug.Log("Number of nodes in the graph = " + maze.getNodes().Count);
-
     }
 
-    private Graph<GraphNode> generateMaze(int length)//Control hallway lengths to make sense
+    private Graph<GraphNode> generateMaze(int length)//Generates a maze of a determined length
     {
         Vector3 currentGlobalPosition = new Vector3(0,0,0);
         Graph<GraphNode> maze = new Graph<GraphNode>();
         int[] nodeValues;
         for(int i = 0; i < length; i++)
         {
-            nodeValues = randomNode();
             Debug.Log("Node number " + i + " Player Coordinates = " + playerCoordinates.x + "," + playerCoordinates.y);
             if (playerCoordinates.x < 1 || playerCoordinates.x > workSpace || playerCoordinates.y < 1 || playerCoordinates.y > workSpace)
                 Debug.Log("Out of work space");
+            nodeValues = randomNode();
             //printNodeValues(nodeValues);
             GraphNode node = new GraphNode(currentGlobalPosition, nodeValues[0],nodeValues[1],nodeValues[2],nodeValues[3],nodeValues[4]);
             maze.addNode(node);
@@ -245,7 +245,7 @@ public class Grid_Generator : MonoBehaviour
 
     private int generateRandomSideHallwayIndex(int straightHallwayLength)//Generate the point where the hallway turns, always less than the straight hallway length
     {
-        return Random.Range(1, straightHallwayLength + 1); //Side hallways have to be instantiated between the first floor and the last one
+        return Random.Range(1, straightHallwayLength + 1); //Side hallways have to be instantiated between the first and the last floor of the straight hallway
     }
 
     private int getWorkSpace()//Returns the dimensions of the workSpace

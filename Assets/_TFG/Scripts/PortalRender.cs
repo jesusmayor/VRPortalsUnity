@@ -24,12 +24,14 @@ namespace TFG
         //referencia al GameManager para tener acceso rápido a los objetos principales 
         GameManager gmref;
 
+        private int doTenTimes;
+
         public float offsetPortal = 0.01f;
         #endregion
 
         public void Start()
         {
-            setCameraTextures();
+            doTenTimes = 10;
         }
 
         public void OnWillRenderObject()
@@ -114,6 +116,14 @@ namespace TFG
 
         public void Update()
         {
+            if (doTenTimes > 0)
+            {
+                Debug.Log("Done");
+                setCameraTextures();
+                doTenTimes--;
+            }
+
+
             Vector3 leftEyeWorldPosition = Vector3.zero; 
             Vector3 rightEyeWorldPosition = Vector3.zero;
             if (TryGetXRNodeOffsetEyeVector(out Vector3 leftEyePos, out Vector3 rightEyePos)) //La posición debe ser obtenida mediante el API de Unity.
@@ -212,10 +222,14 @@ namespace TFG
 
         private  void setCameraTextures()
         {
+            Debug.Log(XRSettings.enabled);
             //creación de la textura de los portales
             //Aqui las texturas devuelven 0, pero en el update devuelven los valores correctos
-            rTextureLeft = new RenderTexture(1648 * 2, 1776 * 2, 32); //Increasing *2 render quality to avoid aliasing.
-            rTextureRight = new RenderTexture(1648 * 2, 1776 * 2, 32);
+            rTextureLeft = new RenderTexture(XRSettings.eyeTextureWidth * 2, XRSettings.eyeTextureHeight * 2, 32); //Increasing *2 render quality to avoid aliasing.
+            rTextureRight = new RenderTexture(XRSettings.eyeTextureWidth * 2, XRSettings.eyeTextureWidth * 2, 32);
+            Debug.Log(XRSettings.eyeTextureWidth);
+            Debug.Log(XRSettings.eyeTextureHeight);
+
 
             rTextureLeft.name = gameObject.name + "RTextureLeft";
             rTextureRight.name = gameObject.name + "RTextureRight";
