@@ -20,6 +20,7 @@ public class GraphNode
     protected int leftTurnIndex;//Store where the left hallway starts
     protected int leftHallwayLength;//Store the left hallway length
     protected int straightHallwayLength;//Store the straight hallway length
+    protected int height;
     protected Color color;//Do I generate it randomly or do I add it to the constructor?
 
 
@@ -36,6 +37,7 @@ public class GraphNode
         this.rightHallwayLength = rightHallwayLength;
         this.leftTurnIndex = leftTurnIndex;
         this.leftHallwayLength = leftHallwayLength;
+        this.height = Random.Range(1, 4);
         this.color = new Color(Random.Range(0, 2), Random.Range(0, 2), Random.Range(0, 1), Random.Range(0, 2));
         createParentGameObject();
     }
@@ -83,15 +85,28 @@ public class GraphNode
     }
     private void createstraightHallway(Vector3 pos, int length)
     {
-        //Track current position
-        Vector3 currentPos = pos;
+        Vector3 currentPos = pos;//Track current position
+        Vector3 wallRotation = new Vector3(0, 0, 90);//Indicates rotation for walls for the straight hallway
 
-        for (int i = 0; i < length; i++)//Iterate over the number of floors and instantiate them
+        for (int i = 0; i < length; i++)
         {
             //Create floor instance
-            createFloor(currentPos, 0.5f);
-            //Move forward 1 time
-            currentPos.z++;
+            createFloor(currentPos, "Floor");//Create the floor
+            createFloor(new Vector3(currentPos.x, currentPos.y + height + 0.5f, currentPos.z), "Ceiling");//Create the ceiling
+
+            if(i == 0)//If this is the first floor, instantiate the walls at start, always 1 less than the height of the node
+                createWall(new Vector3(currentPos.x,currentPos.y + 1, currentPos.z), new Vector3(0, 90, 90), height - 1);
+
+            if(i + 1 != this.leftTurnIndex)//If node doesn´t turn left at this position, create a wall in the left
+                createWall(new Vector3(currentPos.x - 0.5f, currentPos.y,currentPos.z), wallRotation, height);
+
+            if (i + 1 != this.rightTurnIndex)//If node doesn´t turn right at this position, create a wall in the left
+                createWall(new Vector3(currentPos.x + 1, currentPos.y, currentPos.z), wallRotation, height);
+
+            if (i == length - 1)//If this is the last floor, create a wall in the end
+                createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 1.5f), new Vector3(0, 90, 90), height);
+
+            currentPos.z++;//Move forward 1 time
         }
     }//Create the straight hallway of the node
 
@@ -99,6 +114,8 @@ public class GraphNode
     {
         //Current position to instantiate several floors
         Vector3 currentPos = currentWorldCoordinates;
+        //Rotation of the side hallway walls
+        Vector3 wallRotation = new Vector3(0, 90, 90);
 
         if (direction == "right")//If direction is right, set up coordinates to instantiate the right hallway
         {
@@ -114,7 +131,19 @@ public class GraphNode
         for (int i = 0; i < length; i++)//Iterate over the number of floors and instantiate them
         {
             //Create floor instance
-            createFloor(currentPos, 0.5f);
+            createFloor(currentPos, "Floor");//Create the floor
+            createFloor(new Vector3(currentPos.x, currentPos.y + height + 0.5f, currentPos.z), "Ceiling");//Create the ceiling
+
+            if(i == length - 1)//If its the last node of the side hallway, create the end walls 
+            {
+                if(direction == "left")
+                    createWall(new Vector3(currentPos.x, currentPos.y + 1, currentPos.z), new Vector3(0,0,90), height - 1);
+                else
+                    createWall(new Vector3(currentPos.x + 1, currentPos.y + 1, currentPos.z), new Vector3(0, 0, 90), height - 1);
+            }
+            //Create walls across the side hallway distantiated by 1 meter
+            createWall(currentPos, wallRotation, height);
+            createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
             if (direction == "right")
             {
                 currentPos.x++;
@@ -126,7 +155,25 @@ public class GraphNode
         }
     }
 
-    private void createFloor(Vector3 pos, float shrinkRatio)//Create vertices and triangles arrays to make a 1^3 meter cube and instantiate it at the position given
+    private void createFloor(Vector3 pos, string name)
+    {
+        GameObject floor = createSquare(pos,0.5f);
+        floor.name = name;
+    }
+
+    private void createWall(Vector3 pos, Vector3 rotation, int height)
+    {
+        int aux = 0;
+        for(int i = 0; i< height; i++)
+        {
+            GameObject wall = createSquare(new Vector3(pos.x, pos.y + aux, pos.z), 0.5f);
+            wall.transform.Rotate(rotation);
+            wall.name = "Wall";
+            aux += 1;
+        }
+    }
+
+    private GameObject createSquare(Vector3 pos, float shrinkRatio)//Create vertices and triangles arrays to make a 1^3 meter cube and instantiate it at the position given
     {
         //Create the vertices and triangles arrays to create a square at (0,0,0) below the player
         Vector3[] vertices = new Vector3[] {
@@ -154,15 +201,17 @@ public class GraphNode
             0, 6, 7, //face bottom
 	        0, 1, 6
         };
-        GameObject floor = createMeshObject();
+        GameObject square = createMeshObject();
         //Move the floor to the correct position
-        floor.transform.position += pos;
-        createMesh(floor, vertices, triangles);
+        square.transform.position += pos;
+        createMesh(square, vertices, triangles);
+
+        return square;
     }
 
     private GameObject createMeshObject() //Creates the object where the floor is attached, and attaches it to the node gameobject (Its parent)
     {
-        GameObject floor = new GameObject("Floor");
+        GameObject floor = new GameObject();
         floor.transform.parent = parent.transform;
         floor.AddComponent<MeshFilter>();
         floor.AddComponent<MeshRenderer>();

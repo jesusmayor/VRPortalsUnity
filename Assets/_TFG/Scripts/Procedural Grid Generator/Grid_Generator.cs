@@ -37,7 +37,7 @@ public class Grid_Generator : MonoBehaviour
         {
             Debug.Log("Node number " + i + " Player Coordinates = " + playerCoordinates.x + "," + playerCoordinates.y);
             if (playerCoordinates.x < 1 || playerCoordinates.x > workSpace || playerCoordinates.y < 1 || playerCoordinates.y > workSpace)
-                Debug.Log("Out of work space");
+                Debug.LogError("Out of work space");
             nodeValues = randomNode();
             //printNodeValues(nodeValues);
             GraphNode node = new GraphNode(currentGlobalPosition, nodeValues[0],nodeValues[1],nodeValues[2],nodeValues[3],nodeValues[4]);
