@@ -2,57 +2,79 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 //This class is used to generate all of the grid in the scene. It generates it depending on the workSpace of the user to keep him inside its limits.
 public class Grid_Generator : MonoBehaviour
 {
-    public Vector2 playerStartPoint;
+    public Vector3 playerStartPoint;
     public int mazeLength;
+    private Vector3 playerCoordinates;//Used to track the position of the player
+    private Vector3 globalCoordinates;//Used to track the global coordinates of the nodes
     int nodeOffset;//X axis offset between nodes
     int workSpace;//Dimensions of the work space
-    private Vector2 playerCoordinates;//Used to track the position of the player
     enum nodeDirection { Up, Right, Left, Bottom };//Possible directions of a node
     nodeDirection currentNodeDirection;//Used to keep track of the direction of the nodes
     bool first;//Used to know if a node is the first one or not
+
     private void Start()
     {
         //Global variables set
         workSpace = getWorkSpace();
         playerCoordinates = playerStartPoint;//Sets the coordinates to the starting point
+        globalCoordinates = Vector3.zero;
+        nodeOffset = 10;
         currentNodeDirection = nodeDirection.Up;//First node is always in the "up" direction
         first = true;
-        nodeOffset = 10;
 
         Graph<GraphNode> maze = generateMaze(mazeLength);
 
         Debug.Log("Number of nodes in the graph = " + maze.getNodes().Count);
+
+    }
+
+    IEnumerator Coroutine()
+    {
+        yield return new WaitForSeconds(10);
     }
 
     private Graph<GraphNode> generateMaze(int length)//Generates a maze of a determined length
-    {
-        Vector3 currentGlobalPosition = new Vector3(0,0,0);
+    {    
         Graph<GraphNode> maze = new Graph<GraphNode>();
         int[] nodeValues;
-        for(int i = 0; i < length; i++)
+        //############################################################################################################################################################################
+        //#                                                            Create the nodes                                                                                               #
+        //############################################################################################################################################################################
+        for (int i = 0; i < length; i++)
         {
             Debug.Log("Node number " + i + " Player Coordinates = " + playerCoordinates.x + "," + playerCoordinates.y);
             if (playerCoordinates.x < 1 || playerCoordinates.x > workSpace || playerCoordinates.y < 1 || playerCoordinates.y > workSpace)
                 Debug.LogError("Out of work space");
             nodeValues = randomNode();
             //printNodeValues(nodeValues);
-            GraphNode node = new GraphNode(currentGlobalPosition, nodeValues[0],nodeValues[1],nodeValues[2],nodeValues[3],nodeValues[4]);
+            GraphNode node = new GraphNode(globalCoordinates, nodeValues[0], nodeValues[1], nodeValues[2], nodeValues[3], nodeValues[4]);
             maze.addNode(node);
             if (maze.getNumberOfNodes() != 1) //If the node isnt the first one, connect it to the node right before itself
             {
                 maze.connectNodes(maze.getNodes()[i - 1], node);
             }
             node.render();
-            currentGlobalPosition.x += nodeOffset;
+            globalCoordinates.x += nodeOffset;
         }
+        //############################################################################################################################################################################
+        //#                                                            Connect the portals                                                                                           #
+        //############################################################################################################################################################################
+        List<GraphNode> nodes = maze.getNodes();
+
+        for (int i = 0; i < length - 1; i++)
+        {
+            nodes[i].connectTo(nodes[i + 1]);
+        }
+
         return maze;
     }
 
-    private int[] randomNode()//Takes real space limitation into account
+    private int[] randomNode()//Takes work space limitation into account
     {
         int[] resul = new int[5];
         int x = 0;//x movement generated
@@ -75,7 +97,7 @@ public class Grid_Generator : MonoBehaviour
 
         if ((canTurnLeft() && !canTurnRight()) || turnDecision == 0) //Turn to the left
         {
-            //Debug.Log("L");
+            Debug.Log("L");
             //First 2 positions of the array are 0 because the node turned left, so it doesn´t turn right
             resul[1] = 0;
             resul[2] = 0;
@@ -250,7 +272,7 @@ public class Grid_Generator : MonoBehaviour
 
     private int getWorkSpace()//Returns the dimensions of the workSpace
     {
-        return 6;
+        return 8;
     }
 }
     

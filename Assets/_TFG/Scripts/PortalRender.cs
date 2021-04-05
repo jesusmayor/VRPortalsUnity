@@ -118,7 +118,6 @@ namespace TFG
         {
             if (doTenTimes > 0)
             {
-                Debug.Log("Done");
                 setCameraTextures();
                 doTenTimes--;
             }
@@ -222,13 +221,12 @@ namespace TFG
 
         private  void setCameraTextures()
         {
-            Debug.Log(XRSettings.enabled);
             //creación de la textura de los portales
             //Aqui las texturas devuelven 0, pero en el update devuelven los valores correctos
             rTextureLeft = new RenderTexture(XRSettings.eyeTextureWidth * 2, XRSettings.eyeTextureHeight * 2, 32); //Increasing *2 render quality to avoid aliasing.
             rTextureRight = new RenderTexture(XRSettings.eyeTextureWidth * 2, XRSettings.eyeTextureWidth * 2, 32);
-            Debug.Log(XRSettings.eyeTextureWidth);
-            Debug.Log(XRSettings.eyeTextureHeight);
+            //Debug.Log(XRSettings.eyeTextureWidth);
+            //Debug.Log(XRSettings.eyeTextureHeight);
 
 
             rTextureLeft.name = gameObject.name + "RTextureLeft";

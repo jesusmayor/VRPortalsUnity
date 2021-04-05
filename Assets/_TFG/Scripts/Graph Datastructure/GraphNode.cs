@@ -6,22 +6,20 @@ using UnityEngine;
 
 public class GraphNode
 {
-    protected List<GraphNode> connectedNodes;
-    [SerializeField]
-    public Transform entryPortal;
-    [SerializeField]
-    public Transform leavePortal;
+    protected Object portal;//Reference to the prefab
+    protected List<GraphNode> connectedNodes;//List of the nodes connected to this node
+    public Transform entryPortal;//Portal used to enter the node
+    public Transform leavePortal;//Portal used to leave the node
+    protected GameObject parent;//Empty GameObject to store the node
 
-    protected GameObject parent;
-    //The world coordinates could probably be just the X axis value
     protected Vector3 currentWorldCoordinates;//Store here the global position where the node should be instantiated (Basically its (0,0,0) coordinates)
-    protected int rightTurnIndex;//Store where the right hallway starts
-    protected int rightHallwayLength;//Store the right hallway length
-    protected int leftTurnIndex;//Store where the left hallway starts
-    protected int leftHallwayLength;//Store the left hallway length
-    protected int straightHallwayLength;//Store the straight hallway length
-    protected int height;
-    protected Color color;//Do I generate it randomly or do I add it to the constructor?
+    protected int rightTurnIndex;//Right hallway start index
+    protected int rightHallwayLength;//Right hallway length
+    protected int leftTurnIndex;//Left hallway start index
+    protected int leftHallwayLength;//Left hallway length
+    protected int straightHallwayLength;//Straight hallway length
+    protected int height;//Height of the node
+    protected Color color;//Color of the node(generated randomly)
 
 
     public GraphNode()
@@ -37,9 +35,16 @@ public class GraphNode
         this.rightHallwayLength = rightHallwayLength;
         this.leftTurnIndex = leftTurnIndex;
         this.leftHallwayLength = leftHallwayLength;
-        this.height = Random.Range(1, 4);
-        this.color = new Color(Random.Range(0, 2), Random.Range(0, 2), Random.Range(0, 1), Random.Range(0, 2));
+        this.height = Random.Range(2, 5);
+        this.color = new Color(Random.Range(0, 2), Random.Range(0, 2), Random.Range(0, 2), Random.Range(0, 2));
+        portal = Resources.Load("Portal");
         createParentGameObject();
+    }
+
+    public void connectTo(GraphNode node)//Used to connect this node "leavePortal" with another node "entryPortal" 
+    {
+        leavePortal.GetComponent<PortalRender>().connectedPortal = node.entryPortal;
+        node.entryPortal.GetComponent<PortalRender>().connectedPortal = leavePortal;
     }
 
     public bool addConnectedNode(GraphNode node)
@@ -83,7 +88,7 @@ public class GraphNode
         Object.Destroy(this.parent);
         parent = null;
     }
-    private void createstraightHallway(Vector3 pos, int length)
+    private void createstraightHallway(Vector3 pos, int length)//Create the straight hallway of the node
     {
         Vector3 currentPos = pos;//Track current position
         Vector3 wallRotation = new Vector3(0, 0, 90);//Indicates rotation for walls for the straight hallway
@@ -94,13 +99,16 @@ public class GraphNode
             createFloor(currentPos, "Floor");//Create the floor
             createFloor(new Vector3(currentPos.x, currentPos.y + height + 0.5f, currentPos.z), "Ceiling");//Create the ceiling
 
-            if(i == 0)//If this is the first floor, instantiate the walls at start, always 1 less than the height of the node
-                createWall(new Vector3(currentPos.x,currentPos.y + 1, currentPos.z), new Vector3(0, 90, 90), height - 1);
+            if (i == 0)//If this is the first floor, instantiate the walls at start, always 1 less than the height of the node. Also create the entry portal
+            {
+                createWall(new Vector3(currentPos.x, currentPos.y + 1, currentPos.z), new Vector3(0, 90, 90), height - 1);
+                entryPortal = createPortal(new Vector3(currentPos.x + 0.5f, currentPos.y + 0.5f, currentPos.z), Vector3.zero, "Entry Portal");
+            }
 
             if(i + 1 != this.leftTurnIndex)//If node doesn´t turn left at this position, create a wall in the left
                 createWall(new Vector3(currentPos.x - 0.5f, currentPos.y,currentPos.z), wallRotation, height);
 
-            if (i + 1 != this.rightTurnIndex)//If node doesn´t turn right at this position, create a wall in the left
+            if (i + 1 != this.rightTurnIndex)//If node doesn´t turn right at this position, create a wall in the right
                 createWall(new Vector3(currentPos.x + 1, currentPos.y, currentPos.z), wallRotation, height);
 
             if (i == length - 1)//If this is the last floor, create a wall in the end
@@ -108,14 +116,16 @@ public class GraphNode
 
             currentPos.z++;//Move forward 1 time
         }
-    }//Create the straight hallway of the node
+    }
 
     private void turn(string direction, int length)//Calculate where the turned hallways are, their lengths and instantiates them
     {
         //Current position to instantiate several floors
         Vector3 currentPos = currentWorldCoordinates;
-        //Rotation of the side hallway walls
+        //Base rotations needed
         Vector3 wallRotation = new Vector3(0, 90, 90);
+        Vector3 leftPortalRotation = new Vector3(0,90,0);
+        Vector3 rightPortalRotation = new Vector3(0, -90, 0);
 
         if (direction == "right")//If direction is right, set up coordinates to instantiate the right hallway
         {
@@ -134,16 +144,50 @@ public class GraphNode
             createFloor(currentPos, "Floor");//Create the floor
             createFloor(new Vector3(currentPos.x, currentPos.y + height + 0.5f, currentPos.z), "Ceiling");//Create the ceiling
 
-            if(i == length - 1)//If its the last node of the side hallway, create the end walls 
+            if (i == length - 1)//If its the last node of the side hallway, create the end walls and the exit portals
             {
                 if(direction == "left")
-                    createWall(new Vector3(currentPos.x, currentPos.y + 1, currentPos.z), new Vector3(0,0,90), height - 1);
+                {
+                    createWall(new Vector3(currentPos.x - 0.5f, currentPos.y + 1, currentPos.z), new Vector3(0, 0, 90), height - 1);
+                    leavePortal = createPortal(new Vector3(currentPos.x, currentPos.y + 0.5f, currentPos.z + 0.5f), leftPortalRotation, "Leave Portal");
+                }
                 else
+                {
                     createWall(new Vector3(currentPos.x + 1, currentPos.y + 1, currentPos.z), new Vector3(0, 0, 90), height - 1);
+                    leavePortal = createPortal(new Vector3(currentPos.x + 1, currentPos.y + 0.5f, currentPos.z + 0.5f), rightPortalRotation, "Leave Portal");
+                }
+
             }
             //Create walls across the side hallway distantiated by 1 meter
-            createWall(currentPos, wallRotation, height);
-            createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+            if(i == 0 && rightHallwayLength != 0 && direction == "right")//To avoid overlapping of walls at the right hallway
+            {
+                if(rightTurnIndex != 1)
+                    createWall(new Vector3(currentPos.x + 0.5f, currentPos.y, currentPos.z), wallRotation, height);
+                else
+                    createWall(currentPos, wallRotation, height);
+                if (rightTurnIndex != straightHallwayLength)
+                    createWall(new Vector3(currentPos.x + 0.5f, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+                else
+                    createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+            }
+            if (i == 0 && leftHallwayLength != 0 && direction == "left")//To avoid overlapping of walls at the left hallway
+            {
+                if(leftTurnIndex != 1)
+                    createWall(new Vector3(currentPos.x - 0.5f, currentPos.y, currentPos.z), wallRotation, height);
+                else
+                    createWall(currentPos, wallRotation, height);
+                if (leftTurnIndex != straightHallwayLength)
+                    createWall(new Vector3(currentPos.x - 0.5f, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+                else
+                    createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+            }
+            if(i != 0)//Basic case for wall creation
+            {
+                createWall(currentPos, wallRotation, height);
+                createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+            }
+
+     
             if (direction == "right")
             {
                 currentPos.x++;
@@ -171,6 +215,22 @@ public class GraphNode
             wall.name = "Wall";
             aux += 1;
         }
+    }
+
+    private Transform createPortal(Vector3 pos, Vector3 rotation, string name)
+    {
+        GameObject portalRef = GameObject.Instantiate((GameObject)portal);
+        portalRef.transform.parent = parent.transform;
+        portalRef.transform.position += pos;
+        portalRef.transform.Rotate(rotation);
+        portalRef.name = name;
+
+        if (name == "Entry portal")
+            entryPortal = portalRef.transform;
+        else
+            leavePortal = portalRef.transform;
+
+        return portalRef.transform;
     }
 
     private GameObject createSquare(Vector3 pos, float shrinkRatio)//Create vertices and triangles arrays to make a 1^3 meter cube and instantiate it at the position given
@@ -211,11 +271,11 @@ public class GraphNode
 
     private GameObject createMeshObject() //Creates the object where the floor is attached, and attaches it to the node gameobject (Its parent)
     {
-        GameObject floor = new GameObject();
-        floor.transform.parent = parent.transform;
-        floor.AddComponent<MeshFilter>();
-        floor.AddComponent<MeshRenderer>();
-        return floor;
+        GameObject gameobject = new GameObject();
+        gameobject.transform.parent = parent.transform;
+        gameobject.AddComponent<MeshFilter>();
+        gameobject.AddComponent<MeshRenderer>();
+        return gameobject;
     }
 
     private void createMesh(GameObject instance, Vector3[] vertices, int[] triangles) //Gives values to the mesh of the gameobject
