@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 //This class is used to generate all of the grid in the scene. It generates it depending on the workSpace of the user to keep him inside its limits.
 public class Grid_Generator : MonoBehaviour
 {
-    public Vector3 playerStartPoint;
+    public Vector2 playerStartPoint;
     public int mazeLength;
     private Vector3 playerCoordinates;//Used to track the position of the player
     private Vector3 globalCoordinates;//Used to track the global coordinates of the nodes
@@ -31,11 +31,6 @@ public class Grid_Generator : MonoBehaviour
 
         Debug.Log("Number of nodes in the graph = " + maze.getNodes().Count);
 
-    }
-
-    IEnumerator Coroutine()
-    {
-        yield return new WaitForSeconds(10);
     }
 
     private Graph<GraphNode> generateMaze(int length)//Generates a maze of a determined length

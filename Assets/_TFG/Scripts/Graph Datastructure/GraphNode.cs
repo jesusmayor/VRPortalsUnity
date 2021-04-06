@@ -101,7 +101,7 @@ public class GraphNode
 
             if (i == 0)//If this is the first floor, instantiate the walls at start, always 1 less than the height of the node. Also create the entry portal
             {
-                createWall(new Vector3(currentPos.x, currentPos.y + 1, currentPos.z), new Vector3(0, 90, 90), height - 1);
+                createWall(new Vector3(currentPos.x, currentPos.y + 2, currentPos.z), new Vector3(0, 90, 90), height - 2);
                 entryPortal = createPortal(new Vector3(currentPos.x + 0.5f, currentPos.y + 0.5f, currentPos.z), Vector3.zero, "Entry Portal");
             }
 
@@ -148,12 +148,12 @@ public class GraphNode
             {
                 if(direction == "left")
                 {
-                    createWall(new Vector3(currentPos.x - 0.5f, currentPos.y + 1, currentPos.z), new Vector3(0, 0, 90), height - 1);
+                    createWall(new Vector3(currentPos.x - 0.5f, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
                     leavePortal = createPortal(new Vector3(currentPos.x, currentPos.y + 0.5f, currentPos.z + 0.5f), leftPortalRotation, "Leave Portal");
                 }
                 else
                 {
-                    createWall(new Vector3(currentPos.x + 1, currentPos.y + 1, currentPos.z), new Vector3(0, 0, 90), height - 1);
+                    createWall(new Vector3(currentPos.x + 1, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
                     leavePortal = createPortal(new Vector3(currentPos.x + 1, currentPos.y + 0.5f, currentPos.z + 0.5f), rightPortalRotation, "Leave Portal");
                 }
 
