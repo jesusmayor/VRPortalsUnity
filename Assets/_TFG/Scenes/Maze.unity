@@ -247,7 +247,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerStartPoint: {x: 1, y: 1}
-  mazeLength: 3
+  mazeLength: 10
 --- !u!1001 &1931592850
 PrefabInstance:
   m_ObjectHideFlags: 0

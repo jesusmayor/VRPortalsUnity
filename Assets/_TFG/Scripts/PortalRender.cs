@@ -116,7 +116,7 @@ namespace TFG
 
         public void Update()
         {
-            if (doTenTimes > 0)
+            if (doTenTimes > 0)//Comentar
             {
                 setCameraTextures();
                 doTenTimes--;
