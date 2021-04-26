@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using UnityEngine.UIElements;
 
 //This class is used to generate all of the grid in the scene. It generates it depending on the workSpace of the user to keep him inside its limits.
@@ -22,7 +23,9 @@ public class Grid_Generator : MonoBehaviour
     int currentNodeMainHallwayLength;
     bool first;//Used to know if a node is the first one or not
     int mainYIndex;
+    int secondaryYIndex;
     private int currentMainSideHallway;
+    private bool isCurrentMainSideHallwayBiggest;
 
     private void Start()
     {
@@ -33,6 +36,7 @@ public class Grid_Generator : MonoBehaviour
         nodeOffset = 10;
         currentNodeDirection = nodeDirection.Up;//First node is always in the "up" direction
         first = true;
+
 
         Graph<GraphNode> maze = generateMaze(mazeLength, startingCoordinates);
 
@@ -75,26 +79,32 @@ public class Grid_Generator : MonoBehaviour
             //printNodeValues(nodeValues);
             GraphNode node = new GraphNode(currentCoordinates, currentNodeMainHallwayLength, sideHallways[0], sideHallways[1]);
 
-            if (currentNodeType == nodeType.F) //If las node generated was an F type, generate the path connected to it
-                generateNewPath();
-
+            if (currentNodeType == nodeType.F)//If last node generated was an F type, generate the path connected to it
+                generateNewPathForFNode();
+            if (currentNodeType == nodeType.T)//If last node generated was a T type, generate the path connected to it
+                generateNewPathForTNode();
 
             maze.addNode(node);
             if (maze.getNumberOfNodes() != 1) //If the node isnt the first one, connect it to the node right before itself
             {
                 maze.connectNodes(maze.getNodes()[i - 1], node);
             }
-            node.render();
             currentCoordinates.x += nodeOffset;
+        }
+
+        List<GraphNode> nodes = maze.getNodes();
+
+        for (int i = 0; i< length; i++)//Render every node in the graph (Temporal solution)
+        {
+            nodes[i].render();
         }
         //############################################################################################################################################################################
         //#                                                            Connect the portals                                                                                           #
         //############################################################################################################################################################################
-        List<GraphNode> nodes = maze.getNodes();
 
         for (int i = 0; i < length - 1; i++)
         {
-            //nodes[i].connectTo(nodes[i + 1]);
+            nodes[i].connectTo(nodes[i + 1]);
         }
 
         return maze;
@@ -111,36 +121,116 @@ public class Grid_Generator : MonoBehaviour
         int nodeTypeDecision;
         int straightHallwayLength;
         int mainSideHallway = -1;
-
-
-        if (canTurnLeft() && canTurnRight())//If node can turn in both directions, turn to a random one
-        {
-            turnDecision = Random.Range(0, 2);
-            currentNodeType = randomNodeType();
-        }
+        int secondaryHallway = -1;
+        bool alreadyTurned = false;//Used to force algorythm stop after deciding a T node
 
         straightHallwayLength = generateRandomHallwayLength();//Generate the main hallway length
         currentNodeMainHallwayLength = straightHallwayLength;
 
+        Debug.Log("Current node direction = " + currentNodeDirection);
+        Debug.Log("CanTurnLeft = " + canTurnLeft());
+        Debug.Log("CanTurnRight = " + canTurnRight());
+
+        if (canTurnLeft() && canTurnRight())//If node can turn in both directions, turn to both or to a random one
+        {
+            if(Random.Range(0,2) == 0)
+            {
+                turnDecision = Random.Range(0, 2);
+            }
+            else
+            {
+                if (multipleSideHallwayNodeFits(straightHallwayLength))//Node generated is T form
+                {
+                    Debug.Log("Entra a la condición de nodo T");
+                    alreadyTurned = true;
+                    int firstIndex = generateRandomSideHallwayIndex(straightHallwayLength);
+                    int secondIndex;
+                    mainSideHallway = Random.Range(0,2);
+                    currentMainSideHallway = mainSideHallway;
+                    currentNodeType = nodeType.T;
+                    SideHallway leftHallway = new SideHallway("left", firstIndex, generateRandomSideHallwayLength());
+
+                    //Create the second index for the second side hallway so it can never be the same as the first one
+                    if (firstIndex != straightHallwayLength && firstIndex != 1)
+                    {
+                        if (Random.Range(0, 2) == 0)
+                            secondIndex = Random.Range(1, firstIndex);
+                        else
+                            secondIndex = Random.Range(firstIndex + 1, straightHallwayLength + 1);
+                    }
+                    else if (firstIndex == 1)
+                        secondIndex = Random.Range(firstIndex + 1, straightHallwayLength + 1);
+                    else
+                        secondIndex = Random.Range(1,straightHallwayLength);
+                 
+
+                    SideHallway rightHallway = new SideHallway("right", secondIndex, generateRandomSideHallwayLength());
+
+                    leftHallways.Add(leftHallway);
+                    rightHallways.Add(rightHallway);
+
+                    nodeDirectionAux = currentNodeDirection;
+
+                    if (mainSideHallway == 0)//Left side hallway is the main one
+                    {
+                        mainYIndex = firstIndex;
+                        secondaryYIndex = secondIndex;
+                        if (secondIndex > firstIndex)
+                            isCurrentMainSideHallwayBiggest = true;
+                        else
+                            isCurrentMainSideHallwayBiggest = false;
+
+                        x = leftHallways[0].getHallwayLength();//x generated equals the length of the side hallway
+                        y = leftHallways[0].getTurnIndex();//y generated is equal to the point where the side hallway is created
+
+                        updateCoordinatesForLeftTurn(x, y);
+                    }
+                    else//Right side hallway is the main one
+                    {
+                        mainYIndex = secondIndex;
+                        secondaryYIndex = firstIndex;
+                        if (firstIndex > secondIndex)
+                            isCurrentMainSideHallwayBiggest = true;
+                        else
+                            isCurrentMainSideHallwayBiggest = false;
+
+                        x = rightHallways[0].getHallwayLength();//x generated equals the length of the side hallway
+                        y = rightHallways[0].getTurnIndex();//y generated is equal to the point where the side hallway is created
+
+                        updateCoordinatesForRightTurn(x, y);
+                    }
+                }
+                else
+                {
+                    turnDecision = Random.Range(0, 2);
+                }
+            }
+        }
+
         //Debugs to see how conditions are working
         //Debug.Log("Main hallway = " + straightHallwayLength);
         //Debug.Log("CurrentNodeDirection = "+ currentNodeDirection);
-        Debug.Log("CanTurnLeft = " + canTurnLeft());
-        Debug.Log("CanTurnRight = " + canTurnRight());
         Debug.Log("turnDecision = " + turnDecision);
 
-        if ((canTurnLeft() && !canTurnRight()) || turnDecision == 0) //Turn to the left
+        if ((canTurnLeft() && !canTurnRight()) && !alreadyTurned || turnDecision == 0) //Turn to the left
         {
-            nodeTypeDecision = Random.Range(1, 3);
-            if (nodeTypeDecision == 1 && FHallwayFits(straightHallwayLength))
+            nodeTypeDecision = Random.Range(0, 2);
+            if (nodeTypeDecision == 0 && multipleSideHallwayNodeFits(straightHallwayLength))//Node generated is F form
             {
                 mainSideHallway = Random.Range(0, 2);
+                if (mainSideHallway == 1)
+                    secondaryHallway = 0;
+                else
+                    secondaryHallway = 1;
+                Debug.Log("MainSideHallway = " + mainSideHallway);
+                Debug.Log("SecondarySideHallway = " + secondaryHallway);
                 currentMainSideHallway = mainSideHallway;
                 currentNodeType = nodeType.F;
                 leftHallways = generateFNodeSideHallways(straightHallwayLength, "left");
-                mainYIndex = getBiggestTurnIndex(leftHallways);
+                mainYIndex = leftHallways[mainSideHallway].getTurnIndex();
+                secondaryYIndex = leftHallways[secondaryHallway].getTurnIndex();
             }
-            else
+            else//Node generated is L form
             {
                 mainSideHallway = 0;
                 currentMainSideHallway = 0;
@@ -157,52 +247,27 @@ public class Grid_Generator : MonoBehaviour
 
             nodeDirectionAux = currentNodeDirection;
 
-            if (!first)//If its not the first node, set the coordinates depending on the direction
-            {
-                if (currentNodeDirection == nodeDirection.Up)
-                {
-                    playerCoordinates.x -= x;
-                    playerCoordinates.y += y;
-                    currentNodeDirection = nodeDirection.Left;
-                }
-                else if (currentNodeDirection == nodeDirection.Right)
-                {
-                    playerCoordinates.x += y;
-                    playerCoordinates.y += x;
-                    currentNodeDirection = nodeDirection.Up;
-                }
-                else if (currentNodeDirection == nodeDirection.Left)
-                {
-                    playerCoordinates.x -= y;
-                    playerCoordinates.y -= x;
-                    currentNodeDirection = nodeDirection.Bottom;
-                }
-                else if (currentNodeDirection == nodeDirection.Bottom)
-                {
-                    playerCoordinates.x += x;
-                    playerCoordinates.y -= y;
-                    currentNodeDirection = nodeDirection.Right;
-                }
-            }
-            else//If its the first node, substract 1 to the y value since its already in the coordinates
-            {
-                playerCoordinates.x -= x;
-                playerCoordinates.y += y - 1;
-                first = false;
-                currentNodeDirection = nodeDirection.Left;
-            }
+            updateCoordinatesForLeftTurn(x, y);
         }
-        else if ((canTurnRight() && !canTurnLeft()) || turnDecision == 1)//Turn to the right
+        else if ((canTurnRight() && !canTurnLeft()) && !alreadyTurned || turnDecision == 1)//Turn to the right
         {
 
             nodeTypeDecision = Random.Range(1, 3);
-            if (nodeTypeDecision == 1 && FHallwayFits(straightHallwayLength))
+            if (nodeTypeDecision == 1 && multipleSideHallwayNodeFits(straightHallwayLength))
             {
                 mainSideHallway = Random.Range(0, 2);
+                if (mainSideHallway == 1)
+                    secondaryHallway = 0;
+                else
+                    secondaryHallway = 1;
+
+                Debug.Log("MainSideHallway = " + mainSideHallway);
+                Debug.Log("SecondarySideHallway = " + secondaryHallway);
                 currentMainSideHallway = mainSideHallway;
                 currentNodeType = nodeType.F;
                 rightHallways = generateFNodeSideHallways(straightHallwayLength, "right");
-                mainYIndex = getBiggestTurnIndex(rightHallways);
+                mainYIndex = rightHallways[mainSideHallway].getTurnIndex();
+                secondaryYIndex = rightHallways[secondaryHallway].getTurnIndex();
             }
             else
             {
@@ -221,40 +286,7 @@ public class Grid_Generator : MonoBehaviour
 
             nodeDirectionAux = currentNodeDirection;
 
-            if (!first)
-            {
-                if (currentNodeDirection == nodeDirection.Up)
-                {
-                    playerCoordinates.x += x;
-                    playerCoordinates.y += y;
-                    currentNodeDirection = nodeDirection.Right;
-                }
-                else if (currentNodeDirection == nodeDirection.Right)
-                {
-                    playerCoordinates.x += y;
-                    playerCoordinates.y -= x;
-                    currentNodeDirection = nodeDirection.Bottom;
-                }
-                else if (currentNodeDirection == nodeDirection.Left)
-                {
-                    playerCoordinates.x -= y;
-                    playerCoordinates.y += x;
-                    currentNodeDirection = nodeDirection.Up;
-                }
-                else if (currentNodeDirection == nodeDirection.Bottom)
-                {
-                    playerCoordinates.x -= x;
-                    playerCoordinates.y -= y;
-                    currentNodeDirection = nodeDirection.Left;
-                }
-            }
-            else
-            {
-                playerCoordinates.x += x;
-                playerCoordinates.y += y - 1;
-                first = false;
-                currentNodeDirection = nodeDirection.Right;
-            }
+            updateCoordinatesForRightTurn(x, y);
         }
 
 
@@ -375,6 +407,82 @@ public class Grid_Generator : MonoBehaviour
         return resul;
     }
 
+    private void updateCoordinatesForLeftTurn(int x, int y)
+    {
+        if (!first)//If its not the first node, set the coordinates depending on the direction
+        {
+            if (currentNodeDirection == nodeDirection.Up)
+            {
+                playerCoordinates.x -= x;
+                playerCoordinates.y += y;
+                currentNodeDirection = nodeDirection.Left;
+            }
+            else if (currentNodeDirection == nodeDirection.Right)
+            {
+                playerCoordinates.x += y;
+                playerCoordinates.y += x;
+                currentNodeDirection = nodeDirection.Up;
+            }
+            else if (currentNodeDirection == nodeDirection.Left)
+            {
+                playerCoordinates.x -= y;
+                playerCoordinates.y -= x;
+                currentNodeDirection = nodeDirection.Bottom;
+            }
+            else if (currentNodeDirection == nodeDirection.Bottom)
+            {
+                playerCoordinates.x += x;
+                playerCoordinates.y -= y;
+                currentNodeDirection = nodeDirection.Right;
+            }
+        }
+        else//If its the first node, substract 1 to the y value since its already in the coordinates
+        {
+            playerCoordinates.x -= x;
+            playerCoordinates.y += y - 1;
+            first = false;
+            currentNodeDirection = nodeDirection.Left;
+        }
+    }
+
+    private void updateCoordinatesForRightTurn(int x, int y)
+    {
+        if (!first)
+        {
+            if (currentNodeDirection == nodeDirection.Up)
+            {
+                playerCoordinates.x += x;
+                playerCoordinates.y += y;
+                currentNodeDirection = nodeDirection.Right;
+            }
+            else if (currentNodeDirection == nodeDirection.Right)
+            {
+                playerCoordinates.x += y;
+                playerCoordinates.y -= x;
+                currentNodeDirection = nodeDirection.Bottom;
+            }
+            else if (currentNodeDirection == nodeDirection.Left)
+            {
+                playerCoordinates.x -= y;
+                playerCoordinates.y += x;
+                currentNodeDirection = nodeDirection.Up;
+            }
+            else if (currentNodeDirection == nodeDirection.Bottom)
+            {
+                playerCoordinates.x -= x;
+                playerCoordinates.y -= y;
+                currentNodeDirection = nodeDirection.Left;
+            }
+        }
+        else
+        {
+            playerCoordinates.x += x;
+            playerCoordinates.y += y - 1;
+            first = false;
+            currentNodeDirection = nodeDirection.Right;
+        }
+    }
+
     private nodeType randomNodeType()
     {
         int type = Random.Range(1, 4);
@@ -395,7 +503,7 @@ public class Grid_Generator : MonoBehaviour
         return resul;
     }
 
-    private bool FHallwayFits(int straightHallwayLength)
+    private bool multipleSideHallwayNodeFits(int straightHallwayLength)
     {
         bool resul = false;
 
@@ -405,67 +513,156 @@ public class Grid_Generator : MonoBehaviour
         return resul;
     }
 
-    private void generateNewPath()
+    private void generateNewPathForTNode()
     {
-        Vector3 auxCoord;
-        auxCoord = playerCoordinates;
+        Vector3 auxCoord = playerCoordinates;
+        nodeDirection directionAux = currentNodeDirection;
+        int difference;
+
+        Debug.Log("MainYOffset = " + mainYIndex);
+        Debug.Log("Coordinates before adjusting to not main path = " + playerCoordinates);
+
+        //Adjust the coordinates to match the opposite side hallway of the main side hallway
+        if (currentMainSideHallway == 1)//Main side hallway is the right one
+        {
+            switch (nodeDirectionAux)
+            {
+                case nodeDirection.Up:
+                    playerCoordinates.x -= 2;
+                    break;
+                case nodeDirection.Right:
+                    playerCoordinates.y += 2;
+                    break;
+                case nodeDirection.Left:
+                    playerCoordinates.y -= 2;
+                    break;
+                case nodeDirection.Bottom:
+                    playerCoordinates.x += 2;
+                    break;
+            }
+        }
+        else
+        {
+            switch (nodeDirectionAux)//Main side hallway is the left one
+            {
+                case nodeDirection.Up:
+                    playerCoordinates.x += 2;
+                    break;
+                case nodeDirection.Right:
+                    playerCoordinates.y -= 2;
+                    break;
+                case nodeDirection.Left:
+                    playerCoordinates.y += 2;
+                    break;
+                case nodeDirection.Bottom:
+                    playerCoordinates.x -= 2;
+                    break;
+            }
+        }
+
+        if (!isCurrentMainSideHallwayBiggest)//If the new path starts from the first side hallway
+        {
+            difference = mainYIndex - secondaryYIndex;
+            switch (nodeDirectionAux)
+            {
+                case nodeDirection.Up:
+                    playerCoordinates.y -= difference;
+                    break;
+                case nodeDirection.Right:
+                    playerCoordinates.x -= difference;
+                    break;
+                case nodeDirection.Left:
+                    playerCoordinates.x += difference ;
+                    break;
+                case nodeDirection.Bottom:
+                    playerCoordinates.y += difference;
+                    break;
+            }
+        }
+        else//If the new path starts from the second side hallway
+        {
+            difference = secondaryYIndex - mainYIndex;
+            switch (nodeDirectionAux)
+            {
+                case nodeDirection.Up:
+                    playerCoordinates.y += difference;
+                    break;
+                case nodeDirection.Right:
+                    playerCoordinates.x += difference;
+                    break;
+                case nodeDirection.Left:
+                    playerCoordinates.x -= difference;
+                    break;
+                case nodeDirection.Bottom:
+                    playerCoordinates.y -= difference;
+                    break;
+            }
+        }
+
+
+
+        Debug.Log("Starting Path with coordinates = " + playerCoordinates);
+        zAxisOffset += 10;
+        generateMaze(Random.Range(1, 6), new Vector3(startingCoordinates.x, startingCoordinates.y, startingCoordinates.z + zAxisOffset));
+        playerCoordinates = auxCoord;
+        currentNodeDirection = directionAux;
+    }
+
+    private void generateNewPathForFNode()
+    {
+        Vector3 auxCoord = playerCoordinates;
+        nodeDirection directionAux = currentNodeDirection;
+        int difference;
+
         Debug.Log("MainYOffset = " + mainYIndex);
         Debug.Log("Coordinates before adjusting to not main path = " + playerCoordinates);
 
     
         if (currentMainSideHallway == 1)//If the new path starts from the first side hallway
         {
+            difference = mainYIndex - secondaryYIndex;
             switch (nodeDirectionAux)
             {
                 case nodeDirection.Up:
-                    playerCoordinates.y -= mainYIndex - 1;
+                    playerCoordinates.y -= difference;
                     break;
                 case nodeDirection.Right:
-                    playerCoordinates.x -= mainYIndex - 1;
+                    playerCoordinates.x -= difference;
                     break;
                 case nodeDirection.Left:
-                    playerCoordinates.x += mainYIndex - 1;
+                    playerCoordinates.x += difference;
                     break;
                 case nodeDirection.Bottom:
-                    playerCoordinates.y += mainYIndex - 1;
+                    playerCoordinates.y += difference;
                     break;
             }
         }
         else//If the new path starts from the second side hallway
         {
+            difference = secondaryYIndex - mainYIndex;
             switch (nodeDirectionAux)
             {
                 case nodeDirection.Up:
-                    playerCoordinates.y += mainYIndex - 1;
+                    playerCoordinates.y += difference;
                     break;
                 case nodeDirection.Right:
-                    playerCoordinates.x += mainYIndex - 1;
+                    playerCoordinates.x += difference;
                     break;
                 case nodeDirection.Left:
-                    playerCoordinates.x -= mainYIndex - 1;
+                    playerCoordinates.x -= difference;
                     break;
                 case nodeDirection.Bottom:
-                    playerCoordinates.y -= mainYIndex - 1;
+                    playerCoordinates.y -= difference;
                     break;
             }
         }
 
         Debug.Log("Starting Path with coordinates = " + playerCoordinates);
+        Debug.Log("Difference = " + difference);
         zAxisOffset += 10;
         generateMaze(Random.Range(1,6), new Vector3(startingCoordinates.x, startingCoordinates.y, startingCoordinates.z + zAxisOffset));
         playerCoordinates = auxCoord;
-    }
-
-    private int getBiggestTurnIndex(List<SideHallway> hallways)
-    {
-        int resul;
-
-        if (hallways[0].getTurnIndex() < hallways[1].getTurnIndex())
-            resul = hallways[1].getTurnIndex();
-        else
-            resul = hallways[0].getTurnIndex();
-
-        return resul;
+        currentNodeDirection = directionAux;
     }
     private int getWorkSpace()//Returns the dimensions of the workSpace
     {

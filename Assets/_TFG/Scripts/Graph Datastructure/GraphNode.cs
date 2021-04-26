@@ -28,12 +28,12 @@ public class GraphNode
 
     public GraphNode(Vector3 startingPoint, int hallwayLength, List<SideHallway> rightHallways, List<SideHallway> leftHallways) : this()
     {
-        this.currentWorldCoordinates = startingPoint;
-        this.straightHallwayLength = hallwayLength;
+        currentWorldCoordinates = startingPoint;
+        straightHallwayLength = hallwayLength;
         this.rightHallways = rightHallways;
         this.leftHallways = leftHallways;
-        this.height = Random.Range(2, 5);
-        this.color = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1);
+        height = Random.Range(2, 5);
+        color = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1);
         portal = Resources.Load("Portal");
         createParentGameObject();
     }
@@ -76,18 +76,18 @@ public class GraphNode
             createParentGameObject();
         }
 
-        createstraightHallway(currentWorldCoordinates, straightHallwayLength);
-        turn(rightHallways);
-        turn(leftHallways);
+        createstraightHallway(straightHallwayLength);//Render the straight hallway
+        createSideHallways(rightHallways);//Render right hallways
+        createSideHallways(leftHallways);//Render left hallways
     }
     public void unrender()//Unrender this node
     {
         Object.Destroy(this.parent);
         parent = null;
     }
-    private void createstraightHallway(Vector3 pos, int length)//Create the straight hallway of the node
+    private void createstraightHallway(int length)//Create the straight hallway of the node
     {
-        Vector3 currentPos = pos;//Track current position
+        Vector3 currentPos = currentWorldCoordinates;//Track current position
         Vector3 wallRotation = new Vector3(0, 0, 90);//Indicates rotation for walls for the straight hallway
 
         for (int i = 0; i < length; i++)
@@ -130,7 +130,7 @@ public class GraphNode
         return resul;
     }
 
-    private void turn(List<SideHallway> hallways)//Calculate where the turned hallways are, their lengths and instantiates them
+    private void createSideHallways(List<SideHallway> hallways)//Calculate where the turned hallways are, their lengths and instantiates them
     {
         //Current position to instantiate several floors
         Vector3 currentPos;
