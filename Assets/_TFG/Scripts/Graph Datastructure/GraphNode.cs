@@ -4,16 +4,21 @@ using TFG;
 using UnityEditor;
 using UnityEngine;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 
 public class GraphNode
 {
     protected Object portal;//Reference to the prefab
+    public enum nodeType { L, T, F };
+    public enum nodePosition { S, I, F };
     protected List<GraphNode> connectedNodes;//List of the nodes connected to this node
     protected Transform entryPortal;//Portal used to enter the node
     protected Transform leavePortal;//Portal used to leave the node
     protected GameObject parent;//Empty GameObject to store the node
 
     protected Vector3 currentWorldCoordinates;//Store here the global position where the node should be instantiated (Basically its (0,0,0) coordinates)
+    protected nodePosition nodePos;
+    protected nodeType nodeForm;
     protected List<SideHallway> rightHallways;//List of rightHallways of the node
     protected List<SideHallway> leftHallways;//List of leftHallways of the node
     protected int straightHallwayLength;//Straight hallway length
@@ -26,12 +31,14 @@ public class GraphNode
         connectedNodes = new List<GraphNode>();
     }
 
-    public GraphNode(Vector3 startingPoint, int hallwayLength, List<SideHallway> rightHallways, List<SideHallway> leftHallways) : this()
+    public GraphNode(Vector3 startingPoint, int hallwayLength, List<SideHallway> rightHallways, List<SideHallway> leftHallways, nodePosition nodePos) : this()
     {
         currentWorldCoordinates = startingPoint;
         straightHallwayLength = hallwayLength;
         this.rightHallways = rightHallways;
         this.leftHallways = leftHallways;
+        this.nodePos = nodePos;
+        nodeForm = setNodeType();
         height = Random.Range(2, 5);
         color = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1);
         portal = Resources.Load("Portal");
@@ -76,16 +83,16 @@ public class GraphNode
             createParentGameObject();
         }
 
-        createstraightHallway(straightHallwayLength);//Render the straight hallway
-        createSideHallways(rightHallways);//Render right hallways
-        createSideHallways(leftHallways);//Render left hallways
+        renderstraightHallway(straightHallwayLength);//Render the straight hallway
+        renderSideHallways(rightHallways);//Render right hallways
+        renderSideHallways(leftHallways);//Render left hallways
     }
     public void unrender()//Unrender this node
     {
         Object.Destroy(this.parent);
         parent = null;
     }
-    private void createstraightHallway(int length)//Create the straight hallway of the node
+    private void renderstraightHallway(int length)//Create the straight hallway of the node
     {
         Vector3 currentPos = currentWorldCoordinates;//Track current position
         Vector3 wallRotation = new Vector3(0, 0, 90);//Indicates rotation for walls for the straight hallway
@@ -98,8 +105,13 @@ public class GraphNode
 
             if (i == 0)//If this is the first floor, instantiate the walls at start, always 1 less than the height of the node. Also create the entry portal
             {
-                createWall(new Vector3(currentPos.x, currentPos.y + 2, currentPos.z), new Vector3(0, 90, 90), height - 2);
-                entryPortal = createPortal(new Vector3(currentPos.x + 0.5f, currentPos.y + 0.5f, currentPos.z), Vector3.zero, "Entry Portal");
+                if (nodePos == nodePosition.S)
+                    createWall(new Vector3(currentPos.x, currentPos.y + 1, currentPos.z), new Vector3(90, 0, 0), height);
+                else
+                {
+                    createWall(new Vector3(currentPos.x, currentPos.y + 2, currentPos.z), new Vector3(0, 90, 90), height - 2);
+                    entryPortal = createPortal(new Vector3(currentPos.x + 0.5f, currentPos.y + 0.5f, currentPos.z), Vector3.zero, "Entry Portal");
+                }
             }
 
             if(!isTurning(i + 1,leftHallways))//If node doesn´t turn left at this position, create a wall in the left
@@ -115,22 +127,7 @@ public class GraphNode
         }
     }
 
-    private bool isTurning(int i, List<SideHallway> hallways)
-    {
-        bool resul = false;
-
-        if (!IsEmpty(hallways))
-        {
-            for (int j = 0; j < hallways.Count; j++)
-            {
-                if (i == hallways[j].getTurnIndex())
-                    resul = true;
-            }
-        }
-        return resul;
-    }
-
-    private void createSideHallways(List<SideHallway> hallways)//Calculate where the turned hallways are, their lengths and instantiates them
+    private void renderSideHallways(List<SideHallway> hallways)//Calculate where the turned hallways are, their lengths and instantiates them
     {
         //Current position to instantiate several floors
         Vector3 currentPos;
@@ -164,17 +161,40 @@ public class GraphNode
                     createFloor(currentPos, "Floor");//Create the floor
                     createFloor(new Vector3(currentPos.x, currentPos.y + height + 0.5f, currentPos.z), "Ceiling");//Create the ceiling
 
-                    if (i == length - 1)//If its the last node of the side hallway, create the end walls and the exit portals
+                    if (i == length - 1)//If its the last floor of the side hallway, create the end walls and the exit portals
                     {
                         if (direction == "left")
                         {
-                            createWall(new Vector3(currentPos.x - 0.5f, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
-                            leavePortal = createPortal(new Vector3(currentPos.x, currentPos.y + 0.5f, currentPos.z + 0.5f), leftPortalRotation, "Leave Portal");
+                            if (nodePos != nodePosition.F || hallways[h].isMain())//If this node isnt the last one or if this hallway is the main one, open the sidehallway with a portal
+                            {
+                                createWall(new Vector3(currentPos.x - 0.5f, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
+                                leavePortal = createPortal(new Vector3(currentPos.x, currentPos.y + 0.5f, currentPos.z + 0.5f), leftPortalRotation, "Leave Portal");
+                            }
+                            else if(nodeForm != nodeType.L)//If this node has ramifications
+                            {
+                                if(!hallways[h].isMain())//If this hallway isnt the main one close it
+                                    createWall(new Vector3(currentPos.x - 0.5f, currentPos.y, currentPos.z), new Vector3(0, 0, 90), height);
+                            }
+                            else//In this case its a node in L form at the last position, so we close it
+                            {
+                                createWall(new Vector3(currentPos.x - 0.5f, currentPos.y, currentPos.z), new Vector3(0, 0, 90), height);
+                            }
+
                         }
-                        else
+                        else//Same but coordinates for right hallways
                         {
-                            createWall(new Vector3(currentPos.x + 1, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
-                            leavePortal = createPortal(new Vector3(currentPos.x + 1, currentPos.y + 0.5f, currentPos.z + 0.5f), rightPortalRotation, "Leave Portal");
+                            if (nodePos != nodePosition.F || hallways[h].isMain())
+                            {
+                                createWall(new Vector3(currentPos.x + 1, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
+                                leavePortal = createPortal(new Vector3(currentPos.x + 1, currentPos.y + 0.5f, currentPos.z + 0.5f), rightPortalRotation, "Leave Portal");
+                            }
+                            else if (nodeForm != nodeType.L)
+                            {
+                                if (!hallways[h].isMain())
+                                    createWall(new Vector3(currentPos.x + 1, currentPos.y, currentPos.z), new Vector3(0, 0, 90), height);
+                            }
+                            else
+                                createWall(new Vector3(currentPos.x + 1, currentPos.y, currentPos.z), new Vector3(0, 0, 90), height);
                         }
 
                     }
@@ -322,6 +342,31 @@ public class GraphNode
     {
         parent = new GameObject("Node");
         parent.transform.position = currentWorldCoordinates;
+    }
+
+    private nodeType setNodeType()
+    {
+        if (leftHallways.Count == 1 && rightHallways.Count == 1)
+            return nodeType.T;
+        else if (leftHallways.Count == 2 || rightHallways.Count == 2)
+            return nodeType.F;
+        else
+            return nodeType.L;
+    }
+
+    private bool isTurning(int i, List<SideHallway> hallways)
+    {
+        bool resul = false;
+
+        if (!IsEmpty(hallways))
+        {
+            for (int j = 0; j < hallways.Count; j++)
+            {
+                if (i == hallways[j].getTurnIndex())
+                    resul = true;
+            }
+        }
+        return resul;
     }
     public bool IsEmpty<T>(List<T> list)
     {

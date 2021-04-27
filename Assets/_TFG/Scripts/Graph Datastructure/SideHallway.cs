@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SideHallway
 {
+    protected bool ismain;
     protected string side;
     protected int turnIndex;//Hallway start index
     protected int hallwayLength;//Hallway length
@@ -28,5 +29,15 @@ public class SideHallway
     public string getSideValue()
     {
         return side;
+    }
+
+    public bool isMain()
+    {
+        return ismain;
+    }
+
+    public void setAsMain()
+    {
+        ismain = true;
     }
 }

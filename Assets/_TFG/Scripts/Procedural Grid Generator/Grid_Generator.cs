@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using UnityEngine.UIElements;
 
 //This class is used to generate all of the grid in the scene. It generates it depending on the workSpace of the user to keep him inside its limits.
@@ -12,14 +11,14 @@ public class Grid_Generator : MonoBehaviour
     public int mazeLength;
     private Vector3 playerCoordinates;//Used to track the position of the player
     private Vector3 startingCoordinates;//Used to track the global coordinates of the nodes
-    int nodeOffset;//X axis offset between nodes
-    int zAxisOffset;
-    int workSpace;//Dimensions of the work space
-    enum nodeDirection { Up, Right, Left, Bottom };//Possible directions of a node
-    nodeDirection currentNodeDirection;//Used to keep track of the direction of the nodes
-    nodeDirection nodeDirectionAux;
-    enum nodeType { L, T, F };
-    nodeType currentNodeType;
+    private int nodeOffset;//X axis offset between nodes
+    private int zAxisOffset;
+    private int workSpace;//Dimensions of the work space
+    private enum nodeDirection { Up, Right, Left, Bottom };//Possible directions of a node
+    private nodeDirection currentNodeDirection;//Used to keep track of the direction of the nodes
+    private nodeDirection nodeDirectionAux;
+    GraphNode.nodeType currentNodeType;
+    GraphNode.nodePosition currentNodePos;
     int currentNodeMainHallwayLength;
     bool first;//Used to know if a node is the first one or not
     int mainYIndex;
@@ -59,7 +58,7 @@ public class Grid_Generator : MonoBehaviour
         SideHallway leftHallway2 = new SideHallway("left", 7, 3);
         leftHallways.Add(leftHallway1);
         leftHallways.Add(leftHallway2);
-        GraphNode node = new GraphNode(Vector3.zero, 7, rightHallways, leftHallways);
+        GraphNode node = new GraphNode(Vector3.zero, 7, rightHallways, leftHallways, GraphNode.nodePosition.S);
         node.render();
     }
     private Graph<GraphNode> generateMaze(int length, Vector3 startingpoint)//Generates a maze of a determined length
@@ -72,16 +71,30 @@ public class Grid_Generator : MonoBehaviour
         //############################################################################################################################################################################
         for (int i = 0; i < length; i++)
         {
+            GraphNode.nodePosition nodePos;
+            if (i == 0 && first)
+            {
+                nodePos = GraphNode.nodePosition.S;
+            }
+            else if (i == length - 1)
+                nodePos = GraphNode.nodePosition.F;
+            else
+                nodePos = GraphNode.nodePosition.I;
+
+            currentNodePos = nodePos;
+
             Debug.Log("Node number " + i + " Player Coordinates = " + playerCoordinates.x + "," + playerCoordinates.y);
+            Debug.Log("Node position = " + nodePos);
+            Debug.Log("Node type = " + currentNodeType);
             if (playerCoordinates.x < 1 || playerCoordinates.x > workSpace || playerCoordinates.y < 1 || playerCoordinates.y > workSpace)
                 Debug.LogError("Out of work space");
             sideHallways = randomNode();
             //printNodeValues(nodeValues);
-            GraphNode node = new GraphNode(currentCoordinates, currentNodeMainHallwayLength, sideHallways[0], sideHallways[1]);
+            GraphNode node = new GraphNode(currentCoordinates, currentNodeMainHallwayLength, sideHallways[0], sideHallways[1], nodePos);
 
-            if (currentNodeType == nodeType.F)//If last node generated was an F type, generate the path connected to it
+            if (currentNodeType == GraphNode.nodeType.F)//If last node generated was an F type, generate the path connected to it
                 generateNewPathForFNode();
-            if (currentNodeType == nodeType.T)//If last node generated was a T type, generate the path connected to it
+            if (currentNodeType == GraphNode.nodeType.T)//If last node generated was a T type, generate the path connected to it
                 generateNewPathForTNode();
 
             maze.addNode(node);
@@ -104,7 +117,7 @@ public class Grid_Generator : MonoBehaviour
 
         for (int i = 0; i < length - 1; i++)
         {
-            nodes[i].connectTo(nodes[i + 1]);
+            //nodes[i].connectTo(nodes[i + 1]);
         }
 
         return maze;
@@ -131,7 +144,7 @@ public class Grid_Generator : MonoBehaviour
         Debug.Log("CanTurnLeft = " + canTurnLeft());
         Debug.Log("CanTurnRight = " + canTurnRight());
 
-        if (canTurnLeft() && canTurnRight())//If node can turn in both directions, turn to both or to a random one
+        if (canTurnLeft() && canTurnRight())//If node can turn in both directions, turn to both or to a random one or both
         {
             if(Random.Range(0,2) == 0)
             {
@@ -147,7 +160,7 @@ public class Grid_Generator : MonoBehaviour
                     int secondIndex;
                     mainSideHallway = Random.Range(0,2);
                     currentMainSideHallway = mainSideHallway;
-                    currentNodeType = nodeType.T;
+                    currentNodeType = GraphNode.nodeType.T;
                     SideHallway leftHallway = new SideHallway("left", firstIndex, generateRandomSideHallwayLength());
 
                     //Create the second index for the second side hallway so it can never be the same as the first one
@@ -183,6 +196,8 @@ public class Grid_Generator : MonoBehaviour
                         x = leftHallways[0].getHallwayLength();//x generated equals the length of the side hallway
                         y = leftHallways[0].getTurnIndex();//y generated is equal to the point where the side hallway is created
 
+                        leftHallways[0].setAsMain();
+
                         updateCoordinatesForLeftTurn(x, y);
                     }
                     else//Right side hallway is the main one
@@ -196,6 +211,8 @@ public class Grid_Generator : MonoBehaviour
 
                         x = rightHallways[0].getHallwayLength();//x generated equals the length of the side hallway
                         y = rightHallways[0].getTurnIndex();//y generated is equal to the point where the side hallway is created
+
+                        rightHallways[0].setAsMain();
 
                         updateCoordinatesForRightTurn(x, y);
                     }
@@ -225,8 +242,9 @@ public class Grid_Generator : MonoBehaviour
                 Debug.Log("MainSideHallway = " + mainSideHallway);
                 Debug.Log("SecondarySideHallway = " + secondaryHallway);
                 currentMainSideHallway = mainSideHallway;
-                currentNodeType = nodeType.F;
+                currentNodeType = GraphNode.nodeType.F;
                 leftHallways = generateFNodeSideHallways(straightHallwayLength, "left");
+                leftHallways[mainSideHallway].setAsMain();
                 mainYIndex = leftHallways[mainSideHallway].getTurnIndex();
                 secondaryYIndex = leftHallways[secondaryHallway].getTurnIndex();
             }
@@ -234,8 +252,10 @@ public class Grid_Generator : MonoBehaviour
             {
                 mainSideHallway = 0;
                 currentMainSideHallway = 0;
-                currentNodeType = nodeType.L;
+                currentNodeType = GraphNode.nodeType.L;
                 SideHallway leftHallway = new SideHallway("left", generateRandomSideHallwayIndex(straightHallwayLength), generateRandomSideHallwayLength());
+                if (currentNodePos != GraphNode.nodePosition.F)
+                    leftHallway.setAsMain();
                 leftHallways.Add(leftHallway);
             }
 
@@ -264,8 +284,9 @@ public class Grid_Generator : MonoBehaviour
                 Debug.Log("MainSideHallway = " + mainSideHallway);
                 Debug.Log("SecondarySideHallway = " + secondaryHallway);
                 currentMainSideHallway = mainSideHallway;
-                currentNodeType = nodeType.F;
+                currentNodeType = GraphNode.nodeType.F;
                 rightHallways = generateFNodeSideHallways(straightHallwayLength, "right");
+                rightHallways[mainSideHallway].setAsMain();
                 mainYIndex = rightHallways[mainSideHallway].getTurnIndex();
                 secondaryYIndex = rightHallways[secondaryHallway].getTurnIndex();
             }
@@ -273,8 +294,10 @@ public class Grid_Generator : MonoBehaviour
             {
                 mainSideHallway = 0;
                 currentMainSideHallway = 0;
-                currentNodeType = nodeType.L;
+                currentNodeType = GraphNode.nodeType.L;
                 SideHallway rightHallway = new SideHallway("right", generateRandomSideHallwayIndex(straightHallwayLength), generateRandomSideHallwayLength());
+                if(currentNodePos != GraphNode.nodePosition.F)
+                    rightHallway.setAsMain();
                 rightHallways.Add(rightHallway);
             }
 
@@ -384,7 +407,7 @@ public class Grid_Generator : MonoBehaviour
 
         if (straightHallwayLength != 3)
         {
-            currentNodeType = nodeType.F;
+            currentNodeType = GraphNode.nodeType.F;
             int firstIndex = Random.Range(1,straightHallwayLength/2);
             int secondIndex = Random.Range(straightHallwayLength/2 + 1, straightHallwayLength + 1);
             
@@ -481,26 +504,6 @@ public class Grid_Generator : MonoBehaviour
             first = false;
             currentNodeDirection = nodeDirection.Right;
         }
-    }
-
-    private nodeType randomNodeType()
-    {
-        int type = Random.Range(1, 4);
-        nodeType resul = nodeType.L;
-
-        switch (type)
-        {
-            case 1:
-                resul = nodeType.L;
-                break;
-            case 2:
-                resul = nodeType.T;
-                break;
-            case 3:
-                resul = nodeType.F;
-                break;
-        }
-        return resul;
     }
 
     private bool multipleSideHallwayNodeFits(int straightHallwayLength)
