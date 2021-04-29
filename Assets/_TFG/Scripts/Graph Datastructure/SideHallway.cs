@@ -5,7 +5,6 @@ using UnityEngine;
 public class SideHallway
 {
     protected Transform leavePortal;
-    protected GraphNode ramificationRef;
     protected bool ismain;
     protected string side;
     protected int turnIndex;//Hallway start index
