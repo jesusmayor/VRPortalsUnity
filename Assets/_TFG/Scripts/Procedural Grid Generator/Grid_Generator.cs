@@ -25,6 +25,7 @@ public class Grid_Generator : MonoBehaviour
     int secondaryYIndex;
     private int currentMainSideHallway;
     private bool isCurrentMainSideHallwayBiggest;
+    private GraphNode ramificationStart;
 
     private void Start()
     {
@@ -35,6 +36,7 @@ public class Grid_Generator : MonoBehaviour
         nodeOffset = 10;
         currentNodeDirection = nodeDirection.Up;//First node is always in the "up" direction
         first = true;
+        ramificationStart = null;
 
 
         Graph<GraphNode> maze = generateMaze(mazeLength, startingCoordinates);
@@ -66,6 +68,8 @@ public class Grid_Generator : MonoBehaviour
         Vector3 currentCoordinates = startingpoint;
         Graph<GraphNode> maze = new Graph<GraphNode>();
         List<List<SideHallway>> sideHallways;
+
+
         //############################################################################################################################################################################
         //#                                                            Create the nodes                                                                                               #
         //############################################################################################################################################################################
@@ -85,17 +89,30 @@ public class Grid_Generator : MonoBehaviour
 
             Debug.Log("Node number " + i + " Player Coordinates = " + playerCoordinates.x + "," + playerCoordinates.y);
             Debug.Log("Node position = " + nodePos);
-            Debug.Log("Node type = " + currentNodeType);
             if (playerCoordinates.x < 1 || playerCoordinates.x > workSpace || playerCoordinates.y < 1 || playerCoordinates.y > workSpace)
                 Debug.LogError("Out of work space");
             sideHallways = randomNode();
+            Debug.Log("Node type = " + currentNodeType);
             //printNodeValues(nodeValues);
             GraphNode node = new GraphNode(currentCoordinates, currentNodeMainHallwayLength, sideHallways[0], sideHallways[1], nodePos);
 
+            if (ramificationStart != null)
+            {
+                ramificationStart.addConnectedNode(node);
+                ramificationStart.setRamificationRef(node);
+                ramificationStart = null;
+            }
+
             if (currentNodeType == GraphNode.nodeType.F)//If last node generated was an F type, generate the path connected to it
+            {
+                ramificationStart = node;
                 generateNewPathForFNode();
+            }
             if (currentNodeType == GraphNode.nodeType.T)//If last node generated was a T type, generate the path connected to it
+            {
+                ramificationStart = node;
                 generateNewPathForTNode();
+            }
 
             maze.addNode(node);
             if (maze.getNumberOfNodes() != 1) //If the node isnt the first one, connect it to the node right before itself
@@ -110,14 +127,25 @@ public class Grid_Generator : MonoBehaviour
         for (int i = 0; i< length; i++)//Render every node in the graph (Temporal solution)
         {
             nodes[i].render();
+            Debug.Log("Number of leave portals on the node " + i + " = " + nodes[i].leavePortals.Count);
         }
         //############################################################################################################################################################################
         //#                                                            Connect the portals                                                                                           #
         //############################################################################################################################################################################
 
-        for (int i = 0; i < length - 1; i++)
+        for (int i = 0; i < length; i++)
         {
-            //nodes[i].connectTo(nodes[i + 1]);
+            List<GraphNode> connectedNodes = nodes[i].getConnectedNodes();
+            for (int j=0; j < connectedNodes.Count ;j++)
+                if(nodes[i].getNodePosition() != GraphNode.nodePosition.F)
+                    nodes[i].connectTo(nodes[i + 1]);//Connect main path
+
+                if(nodes[i].getNodeType() == GraphNode.nodeType.F)
+                {
+                nodes[i].connectFRamification(nodes[i].getRamificationRef());//Connect the not main path to the start of the ramification for F nodes
+                }
+                else if(nodes[i].getNodeType() == GraphNode.nodeType.T)
+                nodes[i].connectTRamification(nodes[i].getRamificationRef());//Connect the not main path to the start of the ramification for T nodes
         }
 
         return maze;

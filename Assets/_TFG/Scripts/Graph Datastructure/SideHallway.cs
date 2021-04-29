@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class SideHallway
 {
+    protected Transform leavePortal;
+    protected GraphNode ramificationRef;
     protected bool ismain;
     protected string side;
     protected int turnIndex;//Hallway start index
@@ -39,5 +41,15 @@ public class SideHallway
     public void setAsMain()
     {
         ismain = true;
+    }
+
+    public Transform getLeavePortal()
+    {
+        return leavePortal;
+    }
+
+    public void setLeavePortal(Transform leavePortal)
+    {
+        this.leavePortal = leavePortal;
     }
 }
