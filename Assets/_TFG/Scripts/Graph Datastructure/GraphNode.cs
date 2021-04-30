@@ -25,6 +25,7 @@ public class GraphNode
     protected int straightHallwayLength;//Straight hallway length
     protected int height;//Height of the node
     protected Color color;//Color of the node(generated randomly)
+    protected bool uniqueNode;//Used if there´s only one node for the main path
 
 
     public GraphNode()
@@ -208,7 +209,7 @@ public class GraphNode
 
             if (i == 0)//If this is the first floor, instantiate the walls at start, always 1 less than the height of the node. Also create the entry portal
             {
-                if (nodePos == nodePosition.S)
+                if (nodePos == nodePosition.S || uniqueNode)
                     createWall(new Vector3(currentPos.x, currentPos.y + 1, currentPos.z), new Vector3(90, 0, 0), height);
                 else
                 {
@@ -268,7 +269,7 @@ public class GraphNode
                     {
                         if (direction == "left")
                         {
-                            if (nodePos != nodePosition.F)//If this node isnt the last one or if this hallway is the main one, open the sidehallway with a portal
+                            if (nodePos != nodePosition.F && !uniqueNode)//If this node isnt the last one or if this hallway is the main one, open the sidehallway with a portal
                             {
                                 createWall(new Vector3(currentPos.x - 0.5f, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
                                 hallways[h].setLeavePortal(createPortal(new Vector3(currentPos.x, currentPos.y + 0.5f, currentPos.z + 0.5f), leftPortalRotation, 1));
@@ -294,7 +295,7 @@ public class GraphNode
                         }
                         else//Same but coordinates for right hallways
                         {
-                            if (nodePos != nodePosition.F)
+                            if (nodePos != nodePosition.F && !uniqueNode)
                             {
                                 createWall(new Vector3(currentPos.x + 1, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
                                 hallways[h].setLeavePortal(createPortal(new Vector3(currentPos.x + 1, currentPos.y + 0.5f, currentPos.z + 0.5f), rightPortalRotation, 1));
@@ -514,6 +515,11 @@ public class GraphNode
     public nodePosition getNodePosition()
     {
         return nodePos;
+    }
+
+    public void setNodeAsUnique()
+    {
+        uniqueNode = true;
     }
     public bool IsEmpty<T>(List<T> list)
     {

@@ -63,12 +63,12 @@ public class Grid_Generator : MonoBehaviour
         GraphNode node = new GraphNode(Vector3.zero, 7, rightHallways, leftHallways, GraphNode.nodePosition.S);
         node.render();
     }
-    private Graph<GraphNode> generateMaze(int length, Vector3 startingpoint)//Generates a maze of a determined length
+    private Graph<GraphNode> generateMaze(int length, Vector3 startingpoint)//Generates a maze of a determined length, starting at specific coordinates
     {
         Vector3 currentCoordinates = startingpoint;
         Graph<GraphNode> maze = new Graph<GraphNode>();
         List<List<SideHallway>> sideHallways;
-
+        bool currentNodeIsUnique = false;
 
         //############################################################################################################################################################################
         //#                                                            Create the nodes                                                                                               #
@@ -76,9 +76,11 @@ public class Grid_Generator : MonoBehaviour
         for (int i = 0; i < length; i++)
         {
             GraphNode.nodePosition nodePos;
-            if (i == 0 && first)
+            if (i == 0 && first )
             {
                 nodePos = GraphNode.nodePosition.S;
+                if (length == 1)
+                    currentNodeIsUnique = true;
             }
             else if (i == length - 1)
                 nodePos = GraphNode.nodePosition.F;
@@ -95,6 +97,9 @@ public class Grid_Generator : MonoBehaviour
             Debug.Log("Node type = " + currentNodeType);
             //printNodeValues(nodeValues);
             GraphNode node = new GraphNode(currentCoordinates, currentNodeMainHallwayLength, sideHallways[0], sideHallways[1], nodePos);
+
+            if (currentNodeIsUnique)
+                node.setNodeAsUnique();
 
             if (ramificationStart != null)
             {
