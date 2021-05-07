@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Graph<T> where T : GraphNode, new()
 {
-    protected List<GraphNode> nodes; //Not used
+    protected List<GraphNode> nodes;
     protected List<GraphConnection<T>> connections;
 
     public Graph()
@@ -20,7 +20,7 @@ public class Graph<T> where T : GraphNode, new()
 
     public int getNumberOfNodes()
     {
-        return this.getNodes().Count;
+        return getNodes().Count;
     }
 
     public void addNode(GraphNode node)

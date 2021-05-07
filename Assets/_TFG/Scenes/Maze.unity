@@ -185,75 +185,75 @@ LightingSettings:
   m_PVRFilteringAtrousPositionSigmaDirect: 0.5
   m_PVRFilteringAtrousPositionSigmaIndirect: 2
   m_PVRFilteringAtrousPositionSigmaAO: 1
---- !u!1001 &393071813
+--- !u!1001 &1009270590
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 6043133042887763098, guid: e4a71d37e4a9d8c4cb9e7f3249b45356,
+    - target: {fileID: 1266507020059838737, guid: 14026e4771323774ba855cd99a036e85,
         type: 3}
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 6043133042887763098, guid: e4a71d37e4a9d8c4cb9e7f3249b45356,
+    - target: {fileID: 1266507020059838737, guid: 14026e4771323774ba855cd99a036e85,
         type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 6043133042887763098, guid: e4a71d37e4a9d8c4cb9e7f3249b45356,
+    - target: {fileID: 1266507020059838737, guid: 14026e4771323774ba855cd99a036e85,
         type: 3}
       propertyPath: m_LocalPosition.y
       value: 0.1
       objectReference: {fileID: 0}
-    - target: {fileID: 6043133042887763098, guid: e4a71d37e4a9d8c4cb9e7f3249b45356,
+    - target: {fileID: 1266507020059838737, guid: 14026e4771323774ba855cd99a036e85,
         type: 3}
       propertyPath: m_LocalPosition.z
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 6043133042887763098, guid: e4a71d37e4a9d8c4cb9e7f3249b45356,
+    - target: {fileID: 1266507020059838737, guid: 14026e4771323774ba855cd99a036e85,
         type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 6043133042887763098, guid: e4a71d37e4a9d8c4cb9e7f3249b45356,
+    - target: {fileID: 1266507020059838737, guid: 14026e4771323774ba855cd99a036e85,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
-    - target: {fileID: 6043133042887763098, guid: e4a71d37e4a9d8c4cb9e7f3249b45356,
+    - target: {fileID: 1266507020059838737, guid: 14026e4771323774ba855cd99a036e85,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
-    - target: {fileID: 6043133042887763098, guid: e4a71d37e4a9d8c4cb9e7f3249b45356,
+    - target: {fileID: 1266507020059838737, guid: 14026e4771323774ba855cd99a036e85,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
-    - target: {fileID: 6043133042887763098, guid: e4a71d37e4a9d8c4cb9e7f3249b45356,
+    - target: {fileID: 1266507020059838737, guid: 14026e4771323774ba855cd99a036e85,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6043133042887763098, guid: e4a71d37e4a9d8c4cb9e7f3249b45356,
+    - target: {fileID: 1266507020059838737, guid: 14026e4771323774ba855cd99a036e85,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6043133042887763098, guid: e4a71d37e4a9d8c4cb9e7f3249b45356,
+    - target: {fileID: 1266507020059838737, guid: 14026e4771323774ba855cd99a036e85,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6043133042887763099, guid: e4a71d37e4a9d8c4cb9e7f3249b45356,
+    - target: {fileID: 7473345305732344854, guid: 14026e4771323774ba855cd99a036e85,
         type: 3}
       propertyPath: m_Name
-      value: XR_Works
+      value: XR
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: e4a71d37e4a9d8c4cb9e7f3249b45356, type: 3}
+  m_SourcePrefab: {fileID: 100100000, guid: 14026e4771323774ba855cd99a036e85, type: 3}
 --- !u!1 &1107975669
 GameObject:
   m_ObjectHideFlags: 0
@@ -316,4 +316,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerStartPoint: {x: 1, y: 1}
-  mazeLength: 1
+  mazeLength: 2

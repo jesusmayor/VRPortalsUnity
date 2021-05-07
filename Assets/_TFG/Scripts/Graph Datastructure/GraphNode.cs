@@ -12,16 +12,16 @@ public class GraphNode
     public enum nodeType { L, T, F };
     public enum nodePosition { S, I, F };
     protected List<GraphNode> connectedNodes;//List of the nodes connected to this node
-    protected GraphNode ramificationRef;//Reference to the start node of a ramification if this node starts one
     protected Transform entryPortal;//Portal used to enter the node
-    public List<Transform> leavePortals;//List of portals used to leave the node
+    protected List<Transform> leavePortals;//List of portals used to leave the node
+    protected List<SideHallway> rightHallways;//List of rightHallways of the node
+    protected List<SideHallway> leftHallways;//List of leftHallways of the node
+    protected GraphNode ramificationRef;//Reference to the start node of a ramification if this node starts one
     protected GameObject parent;//Empty GameObject to store the node
 
     protected Vector3 currentWorldCoordinates;//Store here the global position where the node should be instantiated (Basically its (0,0,0) coordinates)
     protected nodePosition nodePos;
     protected nodeType nodeForm;
-    protected List<SideHallway> rightHallways;//List of rightHallways of the node
-    protected List<SideHallway> leftHallways;//List of leftHallways of the node
     protected int straightHallwayLength;//Straight hallway length
     protected int height;//Height of the node
     protected Color color;//Color of the node(generated randomly)
@@ -103,10 +103,6 @@ public class GraphNode
     {
         if (!IsEmpty(rightHallways))//Its a F node towards right
         {
-            Debug.Log("righthallway[0] is main = " + rightHallways[0].isMain());
-            Debug.Log("righthallway[1] is main = " + rightHallways[1].isMain());
-            Debug.Log(rightHallways[0].getLeavePortal());
-            Debug.Log(rightHallways[1].getLeavePortal());
             if (!rightHallways[0].isMain())
             {
                 rightHallways[0].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
@@ -120,10 +116,6 @@ public class GraphNode
         }
         else//Its a F node towards left
         {
-            Debug.Log("lefthallway[0] is main = " + leftHallways[0].isMain());
-            Debug.Log("lefthallway[1] is main = " + leftHallways[1].isMain());
-            Debug.Log(leftHallways[0].getLeavePortal());
-            Debug.Log(leftHallways[1].getLeavePortal());
             if (!leftHallways[0].isMain())
             {
                 leftHallways[0].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
@@ -139,10 +131,6 @@ public class GraphNode
 
     public void connectTRamification(GraphNode node)
     {
-        Debug.Log("rightHallway[0] is main = " + rightHallways[0].isMain());
-        Debug.Log("lefthallway[0] is main = " + leftHallways[0].isMain());
-        Debug.Log("rightHallway[0] leavePortal = " + rightHallways[0].getLeavePortal());
-        Debug.Log("leftHallway[0] leavePortal = " + leftHallways[0].getLeavePortal());
         if (!rightHallways[0].isMain() && rightHallways[0].getLeavePortal() != null)
         {
             rightHallways[0].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;

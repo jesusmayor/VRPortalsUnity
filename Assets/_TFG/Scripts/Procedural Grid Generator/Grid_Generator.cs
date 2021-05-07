@@ -132,7 +132,6 @@ public class Grid_Generator : MonoBehaviour
         for (int i = 0; i< length; i++)//Render every node in the graph (Temporal solution)
         {
             nodes[i].render();
-            Debug.Log("Number of leave portals on the node " + i + " = " + nodes[i].leavePortals.Count);
         }
         //############################################################################################################################################################################
         //#                                                            Connect the portals                                                                                           #
