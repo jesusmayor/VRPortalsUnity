@@ -58,10 +58,6 @@ public class Grid_Generator : MonoBehaviour
         Debug.Log("Number of connections in the graph = " + maze.getConnections().Count);
 
         //exampleNode();
-
-        //renderConnectedNodes();
-        //connectNodes(currentNode);
-
     }
 
     private void Update()
@@ -80,8 +76,6 @@ public class Grid_Generator : MonoBehaviour
                     currentNode = currentNode.getConnectedNodes()[2];
                 }
             }
-            renderConnectedNodes();
-            connectNodes(currentNode);
         }
     }
 
@@ -130,25 +124,6 @@ public class Grid_Generator : MonoBehaviour
         }
     }
 
-    private void renderConnectedNodes()
-    {
-        currentNode.render();
-
-        List<GraphNode> connectedSections = currentNode.getConnectedNodes();
-
-        foreach (GraphNode node in connectedSections)
-        {
-            node.render();
-        }
-    }
-    private void connectNodes(GraphNode node)
-    {
-        if (node.getNodePosition() != GraphNode.nodePosition.F)
-            node.connectMainPath(mazeSections[currentNodeIndex + 1]);//If this isn´t a final node, connect the main path
-
-        else
-            node.connectNotMainPath(node.getRamificationRef());
-    }
 
     private void exampleNode()
     {
