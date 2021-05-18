@@ -185,6 +185,25 @@ LightingSettings:
   m_PVRFilteringAtrousPositionSigmaDirect: 0.5
   m_PVRFilteringAtrousPositionSigmaIndirect: 2
   m_PVRFilteringAtrousPositionSigmaAO: 1
+--- !u!1 &797827643 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7473345305732344854, guid: 14026e4771323774ba855cd99a036e85,
+    type: 3}
+  m_PrefabInstance: {fileID: 1009270590}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &797827644
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 797827643}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.1, y: 2, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &1009270590
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -247,12 +266,33 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2883304684862826053, guid: 14026e4771323774ba855cd99a036e85,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3921125950129051656, guid: 14026e4771323774ba855cd99a036e85,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5921991677139689706, guid: 14026e4771323774ba855cd99a036e85,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7336881925199901781, guid: 14026e4771323774ba855cd99a036e85,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 7473345305732344854, guid: 14026e4771323774ba855cd99a036e85,
         type: 3}
       propertyPath: m_Name
       value: XR
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1021878110470429475, guid: 14026e4771323774ba855cd99a036e85, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 14026e4771323774ba855cd99a036e85, type: 3}
 --- !u!1 &1107975669
 GameObject:
@@ -316,4 +356,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerStartPoint: {x: 1, y: 1}
-  mazeLength: 2
+  mazeLength: 10

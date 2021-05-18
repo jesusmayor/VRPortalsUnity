@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 2068025677}
   m_Layer: 0
   m_Name: Portal
-  m_TagString: Untagged
+  m_TagString: Portal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -108,6 +108,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e16e9e7f7468c648a0394201d8d90b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  parentObject: {fileID: 0}
   connectedPortal: {fileID: 0}
   auxCameraleft: {fileID: 0}
   auxCameraright: {fileID: 0}

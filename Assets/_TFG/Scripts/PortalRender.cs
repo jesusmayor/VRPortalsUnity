@@ -10,6 +10,7 @@ namespace TFG
     {
         #region ATTRIBUTES
 
+        public GameObject parentObject;
         //destino al que se teletransporta. Puede ser cualquier Transform, pero en el caso de los portales suele ser otro portal
         public Transform connectedPortal;
         //referencia local al material para acelerar las operaciones
@@ -116,7 +117,11 @@ namespace TFG
 
         public void Update()
         {
-            if (doTenTimes > 0)//Comentar
+            if (doTenTimes > 0)//Se hacen 10 bucles vacíos para esperar a que se inicialize el módulo XR y poder cargar las texturas de las cámaras
+            {
+                doTenTimes--;
+            }
+            else if(doTenTimes == 0)
             {
                 setCameraTextures();
                 doTenTimes--;
@@ -224,12 +229,8 @@ namespace TFG
         private  void setCameraTextures()
         {
             //creación de la textura de los portales
-            //Aqui las texturas devuelven 0, pero en el update devuelven los valores correctos
             rTextureLeft = new RenderTexture(XRSettings.eyeTextureWidth * 2, XRSettings.eyeTextureHeight * 2, 32); //Increasing *2 render quality to avoid aliasing.
             rTextureRight = new RenderTexture(XRSettings.eyeTextureWidth * 2, XRSettings.eyeTextureWidth * 2, 32);
-            //Debug.Log(XRSettings.eyeTextureWidth);
-            //Debug.Log(XRSettings.eyeTextureHeight);
-
 
             rTextureLeft.name = gameObject.name + "RTextureLeft";
             rTextureRight.name = gameObject.name + "RTextureRight";
@@ -243,9 +244,16 @@ namespace TFG
 
             boxCollider = GetComponent<BoxCollider>();
 
+
             //creación de las cámaras que nos aportarán la textura de los portales
             auxCameraleft = CreateAuxCamera(gmref.lefteye);
             auxCameraright = CreateAuxCamera(gmref.righteye);
+
+            if (parentObject != null)
+            {
+                auxCameraleft.transform.parent = parentObject.transform;
+                auxCameraright.transform.parent = parentObject.transform;
+            }
 
             //Asociamos las RenderTextures a los ojos asociados
             auxCameraleft.targetTexture = rTextureLeft;

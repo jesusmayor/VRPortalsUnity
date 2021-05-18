@@ -41,25 +41,28 @@ public class GraphNode
         this.leftHallways = leftHallways;
         this.nodePos = nodePos;
         nodeForm = setNodeType();
-        height = Random.Range(2, 5);
+        height = Random.Range(2, 6);
         color = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1);
         portal = Resources.Load("Portal");
         leavePortals = new List<Transform>();
-        createParentGameObject();
     }
 
-    public void connectTo(GraphNode node)//Used to connect this node "leavePortal" with another node "entryPortal" 
+
+    public void connectMainPath(GraphNode node)//Used to connect this node "leavePortal" with another node "entryPortal" 
     {
-        if(nodeForm == nodeType.L)//Connect main path for L node
+        if (nodeForm == nodeType.L)//Connect main path for L node
         {
+            Debug.Log("Connected L node");
             leavePortals[0].GetComponent<PortalRender>().connectedPortal = node.entryPortal;
             node.entryPortal.GetComponent<PortalRender>().connectedPortal = leavePortals[0];
         }
         else if(nodeForm == nodeType.F)
             {
-                if (!IsEmpty(rightHallways))//Its a F node towards right
+            if (!IsEmpty(rightHallways))//Its a F node towards right
                 {
-                    if (rightHallways[0].isMain())
+                Debug.Log("rightHallways[0] = " + rightHallways[0]);
+                Debug.Log("rightHallways[1] = " + rightHallways[1]);
+                if (rightHallways[0].isMain())
                     {
                         rightHallways[0].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
                         node.entryPortal.GetComponent<PortalRender>().connectedPortal = rightHallways[0].getLeavePortal();
@@ -72,7 +75,9 @@ public class GraphNode
                 }
                 else//Its a F node towards left
                 {
-                    if (leftHallways[0].isMain())
+                Debug.Log("leftHallways[0] = " + leftHallways[0]);
+                Debug.Log("leftHallways[1] = " + leftHallways[1]);
+                if (leftHallways[0].isMain())
                     {
                         leftHallways[0].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
                         node.entryPortal.GetComponent<PortalRender>().connectedPortal = leftHallways[0].getLeavePortal();
@@ -86,6 +91,8 @@ public class GraphNode
             }
         else//node is T form
         {
+            Debug.Log("rightHallways[0] = " + rightHallways[0]);
+            Debug.Log("leftHallways[0] = " + leftHallways[0]);
             if (rightHallways[0].isMain())
             {
                 rightHallways[0].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
@@ -99,47 +106,49 @@ public class GraphNode
         }
     }
 
-    public void connectFRamification(GraphNode node)
+    public void connectNotMainPath(GraphNode node)
     {
-        if (!IsEmpty(rightHallways))//Its a F node towards right
+        if(nodeForm == nodeType.F)
         {
-            if (!rightHallways[0].isMain())
+            if (!IsEmpty(rightHallways))//Its a F node towards right
+            {
+                if (!rightHallways[0].isMain())
+                {
+                    rightHallways[0].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
+                    node.entryPortal.GetComponent<PortalRender>().connectedPortal = rightHallways[0].getLeavePortal();
+                }
+                else
+                {
+                    rightHallways[1].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
+                    node.entryPortal.GetComponent<PortalRender>().connectedPortal = rightHallways[1].getLeavePortal();
+                }
+            }
+            else//Its a F node towards left
+            {
+                if (!leftHallways[0].isMain())
+                {
+                    leftHallways[0].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
+                    node.entryPortal.GetComponent<PortalRender>().connectedPortal = leftHallways[0].getLeavePortal();
+                }
+                else
+                {
+                    leftHallways[1].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
+                    node.entryPortal.GetComponent<PortalRender>().connectedPortal = leftHallways[1].getLeavePortal();
+                }
+            }
+        }
+        else if(nodeForm == nodeType.T)
+        {
+            if (!rightHallways[0].isMain() && rightHallways[0].getLeavePortal() != null)
             {
                 rightHallways[0].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
                 node.entryPortal.GetComponent<PortalRender>().connectedPortal = rightHallways[0].getLeavePortal();
             }
-            else
-            {
-                rightHallways[1].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
-                node.entryPortal.GetComponent<PortalRender>().connectedPortal = rightHallways[1].getLeavePortal();
-            }
-        }
-        else//Its a F node towards left
-        {
-            if (!leftHallways[0].isMain())
+            else if (leftHallways[0].getLeavePortal() != null)
             {
                 leftHallways[0].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
                 node.entryPortal.GetComponent<PortalRender>().connectedPortal = leftHallways[0].getLeavePortal();
             }
-            else
-            {
-                leftHallways[1].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
-                node.entryPortal.GetComponent<PortalRender>().connectedPortal = leftHallways[1].getLeavePortal();
-            }
-        }
-    }
-
-    public void connectTRamification(GraphNode node)
-    {
-        if (!rightHallways[0].isMain() && rightHallways[0].getLeavePortal() != null)
-        {
-            rightHallways[0].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
-            node.entryPortal.GetComponent<PortalRender>().connectedPortal = rightHallways[0].getLeavePortal();
-        }
-        else if(leftHallways[0].getLeavePortal() != null)
-        {
-            leftHallways[0].getLeavePortal().GetComponent<PortalRender>().connectedPortal = node.entryPortal;
-            node.entryPortal.GetComponent<PortalRender>().connectedPortal = leftHallways[0].getLeavePortal();
         }
     }
 
@@ -181,7 +190,7 @@ public class GraphNode
     }
     public void unrender()//Unrender this node
     {
-        Object.Destroy(this.parent);
+        Object.Destroy(parent);
         parent = null;
     }
     private void renderstraightHallway(int length)//Create the straight hallway of the node
@@ -305,7 +314,6 @@ public class GraphNode
                         }
 
                     }
-                    //Create walls across the side hallway distantiated by 1 meter
                     if (i == 0 && length != 0 && direction == "right")//To avoid overlapping of walls at the right hallway
                     {
                         if (turnIndex != 1)
@@ -369,6 +377,7 @@ public class GraphNode
     private Transform createPortal(Vector3 pos, Vector3 rotation, int portalType)
     {
         GameObject portalRef = GameObject.Instantiate((GameObject)portal);
+        portalRef.GetComponent<PortalRender>().parentObject = portalRef;
         portalRef.transform.parent = parent.transform;
         portalRef.transform.position += pos;
         portalRef.transform.Rotate(rotation);
@@ -379,15 +388,12 @@ public class GraphNode
 
         if (portalType == 0)
         {
-            Debug.Log("Adding entry portal");
             entryPortal = portalRef.transform;
         }
         else
         {
-            Debug.Log("Added leave portal");
             leavePortals.Add(portalRef.transform);
         }
-
         return portalRef.transform;
     }
 
@@ -519,4 +525,99 @@ public class GraphNode
         return !list.Any();
     }
 
+    public bool hasRightHallways()
+    {
+        if (!IsEmpty(rightHallways))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public bool hasLeftHallways()
+    {
+        if (!IsEmpty(leftHallways))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public List<SideHallway> getRightHallways()
+    {
+        return rightHallways;
+    }
+
+    public List<SideHallway> getLeftHallways()
+    {
+        return leftHallways;
+    }
+
+    public Transform getMainNodeHallwayPortal()
+    {
+        if(nodeForm == nodeType.L)
+        {
+            if (!IsEmpty(rightHallways))
+                return rightHallways[0].getLeavePortal();
+            else
+                return leftHallways[0].getLeavePortal();
+        }
+        else if(nodeForm == nodeType.F)
+        {
+            if (!IsEmpty(rightHallways))
+            {
+                if (rightHallways[0].isMain())
+                    return rightHallways[0].getLeavePortal();
+                else
+                    return rightHallways[1].getLeavePortal();
+            }
+            else
+            {
+                if (leftHallways[0].isMain())
+                    return leftHallways[0].getLeavePortal();
+                else
+                    return leftHallways[1].getLeavePortal();
+            }
+        }
+        else
+        {
+            if (rightHallways[0].isMain())
+                return rightHallways[0].getLeavePortal();
+            else
+                return leftHallways[0].getLeavePortal();
+        }
+    }
+
+    public Transform getNotMainNodeHallwayPortal()
+    {
+        if (nodeForm == nodeType.F)
+        {
+            if (!IsEmpty(rightHallways))
+            {
+                if (rightHallways[0].isMain())
+                    return rightHallways[1].getLeavePortal();
+                else
+                    return rightHallways[0].getLeavePortal();
+            }
+            else
+            {
+                if (leftHallways[0].isMain())
+                    return leftHallways[1].getLeavePortal();
+                else
+                    return leftHallways[0].getLeavePortal();
+            }
+        }
+        else
+        {
+            if (rightHallways[0].isMain())
+                return leftHallways[0].getLeavePortal();
+            else
+                return rightHallways[0].getLeavePortal();
+        }
+    }
+
+    public Transform getEntryPortal()
+    {
+        return entryPortal;
+    }
 }

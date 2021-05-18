@@ -28,6 +28,11 @@ public class Graph<T> where T : GraphNode, new()
         nodes.Add(node);
     }
 
+    public void addConnection(GraphConnection<T> connection)
+    {
+        connections.Add(connection);
+    }
+
     public List<GraphConnection<T>> getConnections()
     {
         return connections;
@@ -90,6 +95,19 @@ public class Graph<T> where T : GraphNode, new()
     {
         GraphConnection<T> connection = new GraphConnection<T>(nodeA, nodeB);
         return findConnection(connection);
+    }
+
+    public void mergeGraph(Graph<T> ramification)
+    {
+        Debug.Log("Number of nodes in ramification = " + ramification.getNodes().Count);
+        foreach (GraphNode node in ramification.getNodes())
+        {
+            addNode(node);
+        }
+        foreach (GraphConnection<T> connection in ramification.getConnections())
+        {
+            addConnection(connection);
+        }
     }
 }
 

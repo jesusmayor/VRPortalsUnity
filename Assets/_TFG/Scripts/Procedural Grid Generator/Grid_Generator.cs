@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.MemoryProfiler;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -26,25 +27,127 @@ public class Grid_Generator : MonoBehaviour
     private int currentMainSideHallway;
     private bool isCurrentMainSideHallwayBiggest;
     private GraphNode ramificationStart;
+    private GraphNode currentNode;
+    private List<GraphNode> mazeSections;
+    private Graph<GraphNode> maze;
+    private int currentNodeIndex;
+    private string collisionType;
+    SideHallway portalCollisionHallway;
+    private bool collisionDetected;
+    private Graph<GraphNode> auxRamificationGraph = new Graph<GraphNode>();
 
     private void Start()
     {
-        //Global variables set
-        workSpace = getWorkSpace();
-        playerCoordinates = playerStartPoint;//Sets the coordinates to the starting point
-        startingCoordinates = Vector3.zero;
-        nodeOffset = 10;
-        currentNodeDirection = nodeDirection.Up;//First node is always in the "up" direction
-        first = true;
-        ramificationStart = null;
+        initializeGlobalVariables();
 
+        maze = createLabyrinth(mazeLength,startingCoordinates);
 
-        Graph<GraphNode> maze = generateMaze(mazeLength, startingCoordinates);
+        foreach(GraphNode node in maze.getNodes())
+        {
+            node.render();
+        }
+
+        foreach(GraphConnection<GraphNode> connection in maze.getConnections())
+        {
+            connection.connectPortals();
+        }
+
+        initializeMaze();
 
         Debug.Log("Number of nodes in the graph = " + maze.getNodes().Count);
+        Debug.Log("Number of connections in the graph = " + maze.getConnections().Count);
 
         //exampleNode();
 
+        //renderConnectedNodes();
+        //connectNodes(currentNode);
+
+    }
+
+    private void Update()
+    {
+        if (collisionDetected) {//One eye entered a portal
+            Debug.Log("Collision detected, generating next nodes...");
+            if(collisionType == "forward")
+            {
+                currentNodeIndex++;
+                if (portalCollisionHallway.isMain())
+                {
+                    currentNode = currentNode.getConnectedNodes()[1];
+                }
+                else
+                {
+                    currentNode = currentNode.getConnectedNodes()[2];
+                }
+            }
+            renderConnectedNodes();
+            connectNodes(currentNode);
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        //if (collisionDetected)
+            //return;
+        if(collision.gameObject.CompareTag("Portal"))
+        {
+            Debug.Log("Portal collision detected");
+            List<SideHallway> hallways;
+            //collisionDetected = true;
+
+            if (collision.gameObject.name == "Entry Portal")
+            {
+                collisionType = "backwards";
+            }
+            if(collision.gameObject.name == "Leave Portal")
+            {
+                collisionType = "forward";
+
+                //Since this is a leave portal, look for the hallway that has the portal
+                if (currentNode.hasRightHallways())
+                {
+                    hallways = currentNode.getRightHallways();
+                    for (int i = 0; i < currentNode.getRightHallways().Count; i++)
+                    {
+                        if (hallways[i].getLeavePortal() == collision.gameObject.transform)
+                        {
+                            portalCollisionHallway = hallways[i];
+                        }
+                    }
+                }
+                if (currentNode.hasLeftHallways())
+                {
+                    hallways = currentNode.getLeftHallways();
+                    for (int i = 0; i < currentNode.getLeftHallways().Count; i++)
+                    {
+                        if (hallways[i].getLeavePortal() == collision.gameObject.transform)
+                        {
+                            portalCollisionHallway = hallways[i];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void renderConnectedNodes()
+    {
+        currentNode.render();
+
+        List<GraphNode> connectedSections = currentNode.getConnectedNodes();
+
+        foreach (GraphNode node in connectedSections)
+        {
+            node.render();
+        }
+    }
+    private void connectNodes(GraphNode node)
+    {
+        if (node.getNodePosition() != GraphNode.nodePosition.F)
+            node.connectMainPath(mazeSections[currentNodeIndex + 1]);//If this isn´t a final node, connect the main path
+
+        else
+            node.connectNotMainPath(node.getRamificationRef());
     }
 
     private void exampleNode()
@@ -63,10 +166,23 @@ public class Grid_Generator : MonoBehaviour
         GraphNode node = new GraphNode(Vector3.zero, 7, rightHallways, leftHallways, GraphNode.nodePosition.S);
         node.render();
     }
+
+    public Graph<GraphNode> createLabyrinth(int mazeLength, Vector3 startingCoordinates)//Unify the main path with the ramifications
+    {
+        Graph<GraphNode> labyrinth;
+
+        labyrinth = generateMaze(mazeLength, startingCoordinates);
+
+        labyrinth.mergeGraph(auxRamificationGraph);
+
+        return labyrinth;
+    }
+
     private Graph<GraphNode> generateMaze(int length, Vector3 startingpoint)//Generates a maze of a determined length, starting at specific coordinates
     {
         Vector3 currentCoordinates = startingpoint;
         Graph<GraphNode> maze = new Graph<GraphNode>();
+        Graph<GraphNode> ramificationAux = new Graph<GraphNode>();
         List<List<SideHallway>> sideHallways;
         bool currentNodeIsUnique = false;
 
@@ -101,9 +217,10 @@ public class Grid_Generator : MonoBehaviour
             if (currentNodeIsUnique)
                 node.setNodeAsUnique();
 
-            if (ramificationStart != null)
+            if (ramificationStart != null)//This means a new ramification started
             {
-                ramificationStart.addConnectedNode(node);
+                maze.connectNodes(ramificationStart, node);
+                maze.findConnection(ramificationStart, node).setRamificationConnection();
                 ramificationStart.setRamificationRef(node);
                 ramificationStart = null;
             }
@@ -111,47 +228,29 @@ public class Grid_Generator : MonoBehaviour
             if (currentNodeType == GraphNode.nodeType.F)//If last node generated was an F type, generate the path connected to it
             {
                 ramificationStart = node;
-                generateNewPathForFNode();
+                ramificationAux = generateNewPathForFNode();
             }
-            if (currentNodeType == GraphNode.nodeType.T)//If last node generated was a T type, generate the path connected to it
+            else if (currentNodeType == GraphNode.nodeType.T)//If last node generated was a T type, generate the path connected to it
             {
                 ramificationStart = node;
-                generateNewPathForTNode();
+                ramificationAux = generateNewPathForTNode();
             }
 
             maze.addNode(node);
-            if (maze.getNumberOfNodes() != 1) //If the node isnt the first one, connect it to the node right before itself
+            
+            if (maze.getNumberOfNodes() != 1) //If the node isnt the first one, create the connections needed
             {
                 maze.connectNodes(maze.getNodes()[i - 1], node);
             }
+
+            if(ramificationAux != null)//If a ramification was just created, add its nodes to the maze
+            {
+                auxRamificationGraph.mergeGraph(ramificationAux);
+                ramificationAux = null;
+            }
+
             currentCoordinates.x += nodeOffset;
         }
-
-        List<GraphNode> nodes = maze.getNodes();
-
-        for (int i = 0; i< length; i++)//Render every node in the graph (Temporal solution)
-        {
-            nodes[i].render();
-        }
-        //############################################################################################################################################################################
-        //#                                                            Connect the portals                                                                                           #
-        //############################################################################################################################################################################
-
-        for (int i = 0; i < length; i++)
-        {
-            List<GraphNode> connectedNodes = nodes[i].getConnectedNodes();
-            for (int j=0; j < connectedNodes.Count ;j++)
-                if(nodes[i].getNodePosition() != GraphNode.nodePosition.F)
-                    nodes[i].connectTo(nodes[i + 1]);//Connect main path
-
-                if(nodes[i].getNodeType() == GraphNode.nodeType.F)
-                {
-                nodes[i].connectFRamification(nodes[i].getRamificationRef());//Connect the not main path to the start of the ramification for F nodes
-                }
-                else if(nodes[i].getNodeType() == GraphNode.nodeType.T)
-                nodes[i].connectTRamification(nodes[i].getRamificationRef());//Connect the not main path to the start of the ramification for T nodes
-        }
-
         return maze;
     }
 
@@ -186,7 +285,6 @@ public class Grid_Generator : MonoBehaviour
             {
                 if (multipleSideHallwayNodeFits(straightHallwayLength))//Node generated is T form
                 {
-                    Debug.Log("Entra a la condición de nodo T");
                     alreadyTurned = true;
                     int firstIndex = generateRandomSideHallwayIndex(straightHallwayLength);
                     int secondIndex;
@@ -259,7 +357,7 @@ public class Grid_Generator : MonoBehaviour
         //Debugs to see how conditions are working
         //Debug.Log("Main hallway = " + straightHallwayLength);
         //Debug.Log("CurrentNodeDirection = "+ currentNodeDirection);
-        Debug.Log("turnDecision = " + turnDecision);
+        //Debug.Log("turnDecision = " + turnDecision);
 
         if ((canTurnLeft() && !canTurnRight()) && !alreadyTurned || turnDecision == 0) //Turn to the left
         {
@@ -548,11 +646,14 @@ public class Grid_Generator : MonoBehaviour
         return resul;
     }
 
-    private void generateNewPathForTNode()
+    private Graph<GraphNode> generateNewPathForTNode()
     {
         Vector3 auxCoord = playerCoordinates;
         nodeDirection directionAux = currentNodeDirection;
+        GraphNode.nodeType auxNodeType = currentNodeType;
+        GraphNode.nodePosition auxNodePos = currentNodePos;
         int difference;
+        Graph<GraphNode> auxGraph;
 
         Debug.Log("MainYOffset = " + mainYIndex);
         Debug.Log("Coordinates before adjusting to not main path = " + playerCoordinates);
@@ -638,16 +739,23 @@ public class Grid_Generator : MonoBehaviour
 
         Debug.Log("Starting Path with coordinates = " + playerCoordinates);
         zAxisOffset += 10;
-        generateMaze(Random.Range(1, 6), new Vector3(startingCoordinates.x, startingCoordinates.y, startingCoordinates.z + zAxisOffset));
+        auxGraph = generateMaze(Random.Range(1, 6), new Vector3(startingCoordinates.x, startingCoordinates.y, startingCoordinates.z + zAxisOffset));
         playerCoordinates = auxCoord;
         currentNodeDirection = directionAux;
+        currentNodeType = auxNodeType;
+        currentNodePos = auxNodePos;
+
+        return auxGraph;
     }
 
-    private void generateNewPathForFNode()
+    private Graph<GraphNode> generateNewPathForFNode()
     {
         Vector3 auxCoord = playerCoordinates;
         nodeDirection directionAux = currentNodeDirection;
+        GraphNode.nodeType auxNodeType = currentNodeType;
+        GraphNode.nodePosition auxNodePos = currentNodePos;
         int difference;
+        Graph<GraphNode> auxGraph;
 
         Debug.Log("MainYOffset = " + mainYIndex);
         Debug.Log("Coordinates before adjusting to not main path = " + playerCoordinates);
@@ -695,13 +803,36 @@ public class Grid_Generator : MonoBehaviour
         Debug.Log("Starting Path with coordinates = " + playerCoordinates);
         Debug.Log("Difference = " + difference);
         zAxisOffset += 10;
-        generateMaze(Random.Range(1,6), new Vector3(startingCoordinates.x, startingCoordinates.y, startingCoordinates.z + zAxisOffset));
+        auxGraph = generateMaze(Random.Range(1,6), new Vector3(startingCoordinates.x, startingCoordinates.y, startingCoordinates.z + zAxisOffset));
         playerCoordinates = auxCoord;
         currentNodeDirection = directionAux;
+        currentNodeType = auxNodeType;
+        currentNodePos = auxNodePos;
+
+        return auxGraph;
     }
     private int getWorkSpace()//Returns the dimensions of the workSpace
     {
         return 6;
+    }
+
+    private void initializeGlobalVariables()
+    {
+        workSpace = getWorkSpace();
+        playerCoordinates = playerStartPoint;//Sets the coordinates to the starting point
+        startingCoordinates = Vector3.zero;
+        nodeOffset = 10;
+        currentNodeDirection = nodeDirection.Up;//First node is always in the "up" direction
+        first = true;
+        ramificationStart = null;
+    }
+
+    private void initializeMaze()
+    {
+        mazeSections = maze.getNodes();
+        currentNode = mazeSections[0];
+        currentNodeIndex = 0;
+        collisionDetected = false;
     }
 }
 

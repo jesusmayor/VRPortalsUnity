@@ -12,6 +12,7 @@ TagManager:
   - Lefteyetransform
   - Righteyetransform
   - Centereyetransform
+  - Portal
   layers:
   - Default
   - TransparentFX
