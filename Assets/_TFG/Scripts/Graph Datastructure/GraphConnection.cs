@@ -5,8 +5,8 @@ using TFG;
 
 public class GraphConnection<T> where T : GraphNode
 {
-    public T nodeA;
-    public T nodeB;
+    private T nodeA;
+    private T nodeB;
     private Transform nodeAPortal;
     private Transform nodeBPortal;
     private bool ramificationConnection;
@@ -59,4 +59,13 @@ public class GraphConnection<T> where T : GraphNode
         nodeBPortal.GetComponent<PortalRender>().connectedPortal = nodeAPortal;
     }
 
+    public T getNodeA()
+    {
+        return nodeA;
+    }
+
+    public T getNodeB()
+    {
+        return nodeB;
+    }
 }

@@ -33,7 +33,7 @@ public class Grid_Generator : MonoBehaviour
     private int currentNodeIndex;
     private string collisionType;
     SideHallway portalCollisionHallway;
-    private bool collisionDetected;
+    public bool collisionDetected;
     private Graph<GraphNode> auxRamificationGraph = new Graph<GraphNode>();
 
     private void Start()
@@ -42,17 +42,10 @@ public class Grid_Generator : MonoBehaviour
 
         maze = createLabyrinth(mazeLength,startingCoordinates);
 
-        foreach(GraphNode node in maze.getNodes())
-        {
-            node.render();
-        }
-
-        foreach(GraphConnection<GraphNode> connection in maze.getConnections())
-        {
-            connection.connectPortals();
-        }
-
         initializeMaze();
+
+        renderCurrentNodes();
+        connectCurrentNodes();
 
         Debug.Log("Number of nodes in the graph = " + maze.getNodes().Count);
         Debug.Log("Number of connections in the graph = " + maze.getConnections().Count);
@@ -62,20 +55,38 @@ public class Grid_Generator : MonoBehaviour
 
     private void Update()
     {
-        if (collisionDetected) {//One eye entered a portal
+        if (collisionDetected)
+        {
             Debug.Log("Collision detected, generating next nodes...");
-            if(collisionType == "forward")
-            {
-                currentNodeIndex++;
-                if (portalCollisionHallway.isMain())
-                {
-                    currentNode = currentNode.getConnectedNodes()[1];
-                }
-                else
-                {
-                    currentNode = currentNode.getConnectedNodes()[2];
-                }
-            }
+            currentNodeIndex++;
+            renderCurrentNodes();
+            connectCurrentNodes();
+            collisionDetected = false;
+        }
+    }
+
+    private void renderCurrentNodes()
+    {
+        currentNode = maze.getNodes()[currentNodeIndex];
+        currentNode.render();
+        foreach(GraphNode node in currentNode.getConnectedNodes())
+        {
+            node.render();
+        }
+    }
+
+    private void connectCurrentNodes()
+    {
+        List<GraphConnection<GraphNode>> currentNodeConnections = new List<GraphConnection<GraphNode>>();
+        
+        foreach(GraphNode node in currentNode.getConnectedNodes())
+        {
+            currentNodeConnections.Add(maze.findConnection(currentNode, node));
+        }
+
+        foreach(GraphConnection<GraphNode> connection in currentNodeConnections)
+        {
+            connection.connectPortals();
         }
     }
 
@@ -196,7 +207,6 @@ public class Grid_Generator : MonoBehaviour
             {
                 maze.connectNodes(ramificationStart, node);
                 maze.findConnection(ramificationStart, node).setRamificationConnection();
-                ramificationStart.setRamificationRef(node);
                 ramificationStart = null;
             }
 
@@ -213,7 +223,7 @@ public class Grid_Generator : MonoBehaviour
 
             maze.addNode(node);
             
-            if (maze.getNumberOfNodes() != 1) //If the node isnt the first one, create the connections needed
+            if (maze.getNumberOfNodes() != 1) //If the node isnt the first one, connect it to the previous one
             {
                 maze.connectNodes(maze.getNodes()[i - 1], node);
             }
@@ -224,7 +234,7 @@ public class Grid_Generator : MonoBehaviour
                 ramificationAux = null;
             }
 
-            currentCoordinates.x += nodeOffset;
+            currentCoordinates.x += nodeOffset;//Add offset to the x axis to avoid overlapping
         }
         return maze;
     }

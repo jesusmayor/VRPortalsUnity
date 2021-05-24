@@ -16,7 +16,6 @@ public class GraphNode
     protected List<Transform> leavePortals;//List of portals used to leave the node
     protected List<SideHallway> rightHallways;//List of rightHallways of the node
     protected List<SideHallway> leftHallways;//List of leftHallways of the node
-    protected GraphNode ramificationRef;//Reference to the start node of a ramification if this node starts one
     protected GameObject parent;//Empty GameObject to store the node
 
     protected Vector3 currentWorldCoordinates;//Store here the global position where the node should be instantiated (Basically its (0,0,0) coordinates)
@@ -77,11 +76,10 @@ public class GraphNode
         if (parent == null)//If parent is null, this node was unrendered previously so we need to create the parent gameObject before rendering it
         {
             createParentGameObject();
+            renderstraightHallway(straightHallwayLength);//Render the straight hallway
+            renderSideHallways(rightHallways);//Render right hallways
+            renderSideHallways(leftHallways);//Render left hallways
         }
-
-        renderstraightHallway(straightHallwayLength);//Render the straight hallway
-        renderSideHallways(rightHallways);//Render right hallways
-        renderSideHallways(leftHallways);//Render left hallways
     }
     public void unrender()//Unrender this node
     {
@@ -384,16 +382,6 @@ public class GraphNode
             }
         }
         return resul;
-    }
-
-    public void setRamificationRef(GraphNode ramificationReference)
-    {
-        ramificationRef = ramificationReference;
-    }
-
-    public GraphNode getRamificationRef()
-    {
-        return ramificationRef;
     }
 
     public nodeType getNodeType()

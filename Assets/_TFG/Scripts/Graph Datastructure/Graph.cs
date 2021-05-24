@@ -57,8 +57,8 @@ public class Graph<T> where T : GraphNode, new()
         if (connection != null)
         {
             connections.Remove(findConnection(connection));
-            connection.nodeA.removeConnectedNode(connection.nodeB);
-            connection.nodeB.removeConnectedNode(connection.nodeA);
+            connection.getNodeA().removeConnectedNode(connection.getNodeB());
+            connection.getNodeB().removeConnectedNode(connection.getNodeA());
         }
         else
             return false;
@@ -75,14 +75,14 @@ public class Graph<T> where T : GraphNode, new()
     {
         foreach (GraphConnection<T> existingConnection in connections)
         {
-            if (existingConnection.nodeA == connection.nodeA &&
-                existingConnection.nodeB == connection.nodeB)
+            if (existingConnection.getNodeA()== connection.getNodeA() &&
+                existingConnection.getNodeB() == connection.getNodeB())
             {
                 return existingConnection;
             }
 
-            if (existingConnection.nodeA == connection.nodeB &&
-                  existingConnection.nodeB == connection.nodeA)
+            if (existingConnection.getNodeA() == connection.getNodeB() &&
+                  existingConnection.getNodeB() == connection.getNodeA())
             {
                 return existingConnection;
             }
