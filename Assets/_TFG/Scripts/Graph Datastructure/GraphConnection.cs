@@ -25,7 +25,6 @@ public class GraphConnection<T> where T : GraphNode
     public void setRamificationConnection()
     {
         ramificationConnection = true;
-        nodeAPortal = nodeA.getNotMainNodeHallwayPortal(); 
     }
 
     public Transform getNodeAPortal()
@@ -40,16 +39,13 @@ public class GraphConnection<T> where T : GraphNode
 
     public void connectPortals()
     {
-        if (ramificationConnection)
+        if (ramificationConnection)//If its a ramification connection, set the leave portal to the one connected to the ramification start node
         {
             nodeAPortal = nodeA.getNotMainNodeHallwayPortal();
-            Debug.Log("Portal set to not main");
         }
-        else
+        else//Set the leave portal to the main one
         {
-            nodeAPortal = nodeA.getMainNodeHallwayPortal();
-            Debug.Log("Portal set to main");
-        }
+            nodeAPortal = nodeA.getMainNodeHallwayPortal();        }
 
         nodeBPortal = nodeB.getEntryPortal();
 

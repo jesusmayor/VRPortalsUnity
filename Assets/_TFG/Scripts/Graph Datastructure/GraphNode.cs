@@ -16,7 +16,7 @@ public class GraphNode
     protected List<Transform> leavePortals;//List of portals used to leave the node
     protected List<SideHallway> rightHallways;//List of rightHallways of the node
     protected List<SideHallway> leftHallways;//List of leftHallways of the node
-    protected GameObject parent;//Empty GameObject to store the node
+    public GameObject parent;//Empty GameObject to store the node
 
     protected Vector3 currentWorldCoordinates;//Store here the global position where the node should be instantiated (Basically its (0,0,0) coordinates)
     protected nodePosition nodePos;

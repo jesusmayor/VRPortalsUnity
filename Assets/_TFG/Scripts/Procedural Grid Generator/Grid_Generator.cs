@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Schema;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.MemoryProfiler;
 using UnityEngine;
@@ -31,10 +32,12 @@ public class Grid_Generator : MonoBehaviour
     private List<GraphNode> mazeSections;
     private Graph<GraphNode> maze;
     private int currentNodeIndex;
-    private string collisionType;
-    SideHallway portalCollisionHallway;
-    public bool collisionDetected;
+    public bool leaveCollisionDetected;
+    public bool entryCollisionDetected;
+    public Transform currentPortalCollided;
     private Graph<GraphNode> auxRamificationGraph = new Graph<GraphNode>();
+    public Transform currentNodeTransform;//Only used for debugging
+    private GraphNode auxGraphNode;
 
     private void Start()
     {
@@ -55,23 +58,119 @@ public class Grid_Generator : MonoBehaviour
 
     private void Update()
     {
-        if (collisionDetected)
+        if (leaveCollisionDetected)
         {
             Debug.Log("Collision detected, generating next nodes...");
-            currentNodeIndex++;
+            //Debug.Log("AuxGraphNode = " + auxGraphNode);
+            if(auxGraphNode != null)
+            {
+                Debug.Log("Entered auxGraphNode condition");
+                currentNode = maze.getNodes()[maze.getNodes().IndexOf(auxGraphNode) + 1];
+                auxGraphNode = null;
+            }
+            else if (currentNode.getNodeType() != GraphNode.nodeType.L)
+            {
+                if(currentNode.getMainNodeHallwayPortal() == currentPortalCollided)//Main path connection
+                {
+                    Debug.Log("Main Portal of a ramification node");
+                    currentNode = maze.getNodes()[maze.getNodes().IndexOf(currentNode) + 1];
+                }
+                else//Ramification connection
+                {
+                    Debug.Log("Ramification Portal");
+                    foreach (GraphNode node in currentNode.getConnectedNodes())//Set the current node to the first node of the ramification
+                    {
+                        if(maze.findConnection(currentNode, node).isRamicationType())
+                        {
+                            currentNode = node;
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Debug.Log("Main Portal of an L node");
+                if(currentNode.getNodePosition() != GraphNode.nodePosition.F)
+                {
+                    currentNode = maze.getNodes()[maze.getNodes().IndexOf(currentNode) + 1];
+                }
+            }
+
             renderCurrentNodes();
             connectCurrentNodes();
-            collisionDetected = false;
+            leaveCollisionDetected = false;
         }
+
+        if (entryCollisionDetected)
+        {
+            Debug.Log("Entry Collision Detected");
+
+            unrenderConnectedNodes();
+            connectCurrentNodes();
+            entryCollisionDetected = false;
+        }
+    }
+
+    private void unrenderConnectedNodes()
+    {
+        GraphNode aux = new GraphNode();
+
+        int index = maze.getNodes().IndexOf(currentNode) - 1;
+        foreach (GraphNode node in maze.getNodes()[index].getConnectedNodes())//Render nodes needed forward
+        {
+            if (node != currentNode)
+                node.render();
+        }
+
+        foreach (GraphNode node in currentNode.getConnectedNodes())//Get the reference to the node that starts a ramification
+        {
+            GraphConnection<GraphNode> con = maze.findConnection(node, currentNode);
+            if (con.getNodeB() == currentNode)
+            {
+                aux = node;
+                break;
+            }
+        }
+
+        foreach (GraphNode node in currentNode.getConnectedNodes())
+        {
+            if (node != aux && node != currentNode)
+                node.unrender();
+        }
+
+        GraphNode node1 = maze.getNodes()[maze.getNodes().IndexOf(currentNode) - 1];
+        GraphNode node2 = maze.getNodes()[maze.getNodes().IndexOf(currentNode)];
+        GraphConnection < GraphNode > connection = maze.findConnection(node1, node2);
+
+        Debug.Log("Connection = " + connection);
+        if(connection == null)
+        {
+            Debug.Log("Enters");
+            auxGraphNode = aux;
+        }
+
+        currentNode = aux;
+        currentNodeTransform = currentNode.parent.transform;
     }
 
     private void renderCurrentNodes()
     {
-        currentNode = maze.getNodes()[currentNodeIndex];
         currentNode.render();
+        currentNodeTransform = currentNode.parent.transform;
         foreach(GraphNode node in currentNode.getConnectedNodes())
         {
             node.render();
+        }
+        
+        if(currentNode != maze.getNodes()[0])
+        {
+            int index = maze.getNodes().IndexOf(currentNode) - 1;
+            foreach (GraphNode node in maze.getNodes()[index].getConnectedNodes())//Unrender nodes left behind
+            {
+                if (node != currentNode)
+                    node.unrender();
+            }
         }
     }
 
@@ -89,52 +188,6 @@ public class Grid_Generator : MonoBehaviour
             connection.connectPortals();
         }
     }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        //if (collisionDetected)
-            //return;
-        if(collision.gameObject.CompareTag("Portal"))
-        {
-            Debug.Log("Portal collision detected");
-            List<SideHallway> hallways;
-            //collisionDetected = true;
-
-            if (collision.gameObject.name == "Entry Portal")
-            {
-                collisionType = "backwards";
-            }
-            if(collision.gameObject.name == "Leave Portal")
-            {
-                collisionType = "forward";
-
-                //Since this is a leave portal, look for the hallway that has the portal
-                if (currentNode.hasRightHallways())
-                {
-                    hallways = currentNode.getRightHallways();
-                    for (int i = 0; i < currentNode.getRightHallways().Count; i++)
-                    {
-                        if (hallways[i].getLeavePortal() == collision.gameObject.transform)
-                        {
-                            portalCollisionHallway = hallways[i];
-                        }
-                    }
-                }
-                if (currentNode.hasLeftHallways())
-                {
-                    hallways = currentNode.getLeftHallways();
-                    for (int i = 0; i < currentNode.getLeftHallways().Count; i++)
-                    {
-                        if (hallways[i].getLeavePortal() == collision.gameObject.transform)
-                        {
-                            portalCollisionHallway = hallways[i];
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 
     private void exampleNode()
     {
@@ -817,7 +870,7 @@ public class Grid_Generator : MonoBehaviour
         mazeSections = maze.getNodes();
         currentNode = mazeSections[0];
         currentNodeIndex = 0;
-        collisionDetected = false;
+        leaveCollisionDetected = false;
     }
 }
 

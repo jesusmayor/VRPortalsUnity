@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Movement : MonoBehaviour
+public class Movement_Controller : MonoBehaviour
 {
 
     #region "Variables"
@@ -20,9 +20,18 @@ public class Movement : MonoBehaviour
         Rigid.MovePosition(transform.position + (transform.forward * Input.GetAxis("Vertical") * MoveSpeed) + (transform.right * Input.GetAxis("Horizontal") * MoveSpeed));
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider col)
     {
-        Debug.Log("Collided");
-        grid_generator.collisionDetected = true;
+        if(col.gameObject.name == "Leave Portal")
+        {
+            Debug.Log("Collided with a leave portal");
+            grid_generator.leaveCollisionDetected = true;
+            grid_generator.currentPortalCollided = col.transform;
+        }
+        else if(col.gameObject.name == "Entry Portal")
+        {
+            grid_generator.entryCollisionDetected = true;
+            grid_generator.currentPortalCollided = col.transform;
+        }
     }
 }

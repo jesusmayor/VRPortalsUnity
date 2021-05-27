@@ -391,5 +391,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerStartPoint: {x: 1, y: 1}
-  mazeLength: 1000
-  collisionDetected: 0
+  mazeLength: 10
+  leaveCollisionDetected: 0
+  entryCollisionDetected: 0
+  currentPortalCollided: {fileID: 0}
+  currentNodeTransform: {fileID: 0}
