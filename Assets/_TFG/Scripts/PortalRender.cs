@@ -9,8 +9,10 @@ namespace TFG
     public class PortalRender : MonoBehaviour
     {
         #region ATTRIBUTES
-
+        //Nodo al que pertenece el portal
         public GameObject parentObject;
+
+        public bool collidable;
         //destino al que se teletransporta. Puede ser cualquier Transform, pero en el caso de los portales suele ser otro portal
         public Transform connectedPortal;
         //referencia local al material para acelerar las operaciones
@@ -33,6 +35,7 @@ namespace TFG
         public void Start()
         {
             doTenTimes = 10;
+            collidable = false;
         }
 
         public void OnWillRenderObject()
@@ -50,13 +53,13 @@ namespace TFG
                 }
                 auxCameraleft.transform.rotation = GetRelativeDir(gmref.lefteye.transform.rotation); //La rotación si vale la de la cámara.
                 //Aplicamos la matriz de proyección ublicua en el ojo izquierdo
-                Vector4 clipPlaneB_L = CameraSpacePlane(auxCameraleft, connectedPortal.transform.position, connectedPortal.transform.forward, 1.0f);
-                Matrix4x4 projectionB_L = gmref.lefteye.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left);
-                CalculateObliqueMatrix(ref projectionB_L, clipPlaneB_L);
-                auxCameraleft.projectionMatrix = gmref.lefteye.CalculateObliqueMatrix(clipPlaneB_L);
+                //Vector4 clipPlaneB_L = CameraSpacePlane(auxCameraleft, connectedPortal.transform.position, connectedPortal.transform.forward, 1.0f);
+                //Matrix4x4 projectionB_L = gmref.lefteye.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left);
+                //CalculateObliqueMatrix(ref projectionB_L, clipPlaneB_L);
+                //auxCameraleft.projectionMatrix = gmref.lefteye.CalculateObliqueMatrix(clipPlaneB_L);
 
                 //Comentado para sustituir a la proyección ublicua en el caso de que sea necesario.
-                //auxCameraleft.projectionMatrix = gmref.lefteye.projectionMatrix;
+                auxCameraleft.projectionMatrix = gmref.lefteye.projectionMatrix;
 
                 //Indicamos a la cámara izquierda que renderice sobre su textura derecha (Que es la que ahora tiene asociado el portal).
                 auxCameraleft.Render();
@@ -71,13 +74,13 @@ namespace TFG
                 }
                 auxCameraright.transform.rotation = GetRelativeDir(gmref.righteye.transform.rotation); //La rotación si vale la de la cámara.
                 //Aplicamos la matriz de proyección ublicua del ojo derecho.
-                Vector4 clipPlaneB_R = CameraSpacePlane(auxCameraright, connectedPortal.transform.position, connectedPortal.transform.forward, 1.0f);
-                Matrix4x4 projectionB_R = gmref.righteye.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right);
-                CalculateObliqueMatrix(ref projectionB_R, clipPlaneB_R);
-                auxCameraright.projectionMatrix = gmref.righteye.CalculateObliqueMatrix(clipPlaneB_R);
+                //Vector4 clipPlaneB_R = CameraSpacePlane(auxCameraright, connectedPortal.transform.position, connectedPortal.transform.forward, 1.0f);
+                //Matrix4x4 projectionB_R = gmref.righteye.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right);
+                //CalculateObliqueMatrix(ref projectionB_R, clipPlaneB_R);
+                //auxCameraright.projectionMatrix = gmref.righteye.CalculateObliqueMatrix(clipPlaneB_R);
 
                 //Comentado para sustituir a la proyección ublicua en el caso de que sea necesario.
-                //auxCameraright.projectionMatrix = gmref.righteye.projectionMatrix;
+                auxCameraright.projectionMatrix = gmref.righteye.projectionMatrix;
 
                 //Indicamos a la cámara derecha que renderice sobre su textura derecha (Que es la que ahora tiene asociado el portal).
                 auxCameraright.Render();
@@ -171,6 +174,7 @@ namespace TFG
             auxCam.CopyFrom(mainCamera);
             auxCam.tag = "auxCamera";
             auxCam.stereoTargetEye = StereoTargetEyeMask.None;
+            auxCam.cullingMask = ~(1 << LayerMask.NameToLayer("Portal"));
 
             //desactivamos la cámara para evitar bucles
             auxCam.enabled = false;

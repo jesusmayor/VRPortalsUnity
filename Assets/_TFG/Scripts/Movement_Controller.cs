@@ -1,11 +1,12 @@
+using TFG;
 using UnityEngine;
 
 public class Movement_Controller : MonoBehaviour
 {
 
     #region "Variables"
-    public Rigidbody Rigid;
     public Grid_Generator grid_generator;
+    public Transform XRRig_Transform;
     public float MouseSensitivity;
     public float MoveSpeed;
     #endregion
@@ -16,8 +17,16 @@ public class Movement_Controller : MonoBehaviour
     }
     void Update()
     {
-        Rigid.MoveRotation(Rigid.rotation * Quaternion.Euler(new Vector3(0, Input.GetAxis("Mouse X") * MouseSensitivity, 0)));
-        Rigid.MovePosition(transform.position + (transform.forward * Input.GetAxis("Vertical") * MoveSpeed) + (transform.right * Input.GetAxis("Horizontal") * MoveSpeed));
+        if(Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0)
+        {
+            Vector3 forward = transform.forward;
+            Vector3 right = transform.right;
+            forward.y = 0;
+            forward.Normalize();
+            right.y = 0;
+            right.Normalize();
+            XRRig_Transform.position += (forward * Input.GetAxis("Vertical") * MoveSpeed) + (right * Input.GetAxis("Horizontal") * MoveSpeed);
+        }
     }
 
     private void OnTriggerEnter(Collider col)
@@ -30,8 +39,16 @@ public class Movement_Controller : MonoBehaviour
         }
         else if(col.gameObject.name == "Entry Portal")
         {
-            grid_generator.entryCollisionDetected = true;
-            grid_generator.currentPortalCollided = col.transform;
+            if(col.GetComponent<PortalRender>().collidable == true)//To avoid entry portal to read collision at the teleport time
+            {
+                col.GetComponent<PortalRender>().collidable = false;
+                grid_generator.entryCollisionDetected = true;
+                grid_generator.currentPortalCollided = col.transform;
+            }
+            else
+            {
+                col.GetComponent<PortalRender>().collidable = true;
+            }
         }
     }
 }
