@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TFG;
 using UnityEditor;
 using UnityEngine;
-using System.Linq;
+using System.Linq; 
 
 
 public class GraphNode
@@ -398,7 +398,7 @@ public class GraphNode
     {
         uniqueNode = true;
     }
-    public bool IsEmpty<T>(List<T> list)
+    private bool IsEmpty<T>(List<T> list)
     {
         if (list == null)
         {
@@ -436,7 +436,7 @@ public class GraphNode
         return leftHallways;
     }
 
-    public Transform getMainNodeHallwayPortal()
+    public Transform getMainHallwayPortal()
     {
         if(nodeForm == nodeType.L)
         {
@@ -471,7 +471,7 @@ public class GraphNode
         }
     }
 
-    public Transform getNotMainNodeHallwayPortal()
+    public Transform getNotMainHallwayPortal()
     {
         if (nodeForm == nodeType.F)
         {
@@ -502,5 +502,12 @@ public class GraphNode
     public Transform getEntryPortal()
     {
         return entryPortal;
+    }
+
+    public bool isRendered()
+    {
+        if (parent == null)
+            return false;
+        return true;
     }
 }

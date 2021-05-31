@@ -29,9 +29,7 @@ public class Grid_Generator : MonoBehaviour
     private bool isCurrentMainSideHallwayBiggest;
     private GraphNode ramificationStart;
     private GraphNode currentNode;
-    private List<GraphNode> mazeSections;
     private Graph<GraphNode> maze;
-    private int currentNodeIndex;
     public bool leaveCollisionDetected;
     public bool entryCollisionDetected;
     public Transform currentPortalCollided;
@@ -47,7 +45,7 @@ public class Grid_Generator : MonoBehaviour
 
         initializeMaze();
 
-        renderCurrentNodes();
+        updateNodesForward();
         connectCurrentNodes();
 
         Debug.Log("Number of nodes in the graph = " + maze.getNodes().Count);
@@ -62,7 +60,7 @@ public class Grid_Generator : MonoBehaviour
         {
             Debug.Log("Collision detected, generating next nodes...");
             //Debug.Log("AuxGraphNode = " + auxGraphNode);
-            if(auxGraphNode != null)
+            if(auxGraphNode != null && currentPortalCollided == currentNode.getMainHallwayPortal())//Solo debe entrar cuando el pasillo colisionado sea el main
             {
                 Debug.Log("Entered auxGraphNode condition");
                 currentNode = maze.getNodes()[maze.getNodes().IndexOf(auxGraphNode) + 1];
@@ -70,7 +68,7 @@ public class Grid_Generator : MonoBehaviour
             }
             else if (currentNode.getNodeType() != GraphNode.nodeType.L)
             {
-                if(currentNode.getMainNodeHallwayPortal() == currentPortalCollided)//Main path connection
+                if(currentNode.getMainHallwayPortal() == currentPortalCollided)//Main path connection
                 {
                     Debug.Log("Main Portal of a ramification node");
                     currentNode = maze.getNodes()[maze.getNodes().IndexOf(currentNode) + 1];
@@ -80,7 +78,7 @@ public class Grid_Generator : MonoBehaviour
                     Debug.Log("Ramification Portal");
                     foreach (GraphNode node in currentNode.getConnectedNodes())//Set the current node to the first node of the ramification
                     {
-                        if(maze.findConnection(currentNode, node).isRamicationType())
+                        if(maze.findConnection(currentNode, node).getNodeA() == currentNode)
                         {
                             currentNode = node;
                             break;
@@ -97,7 +95,7 @@ public class Grid_Generator : MonoBehaviour
                 }
             }
 
-            renderCurrentNodes();
+            updateNodesForward();
             connectCurrentNodes();
             leaveCollisionDetected = false;
         }
@@ -106,22 +104,16 @@ public class Grid_Generator : MonoBehaviour
         {
             Debug.Log("Entry Collision Detected");
 
-            unrenderConnectedNodes();
+            updateNodesBackwards();
             connectCurrentNodes();
             entryCollisionDetected = false;
         }
     }
 
-    private void unrenderConnectedNodes()
+    private void updateNodesBackwards()
     {
         GraphNode aux = new GraphNode();
-
-        int index = maze.getNodes().IndexOf(currentNode) - 1;
-        foreach (GraphNode node in maze.getNodes()[index].getConnectedNodes())//Render nodes needed forward
-        {
-            if (node != currentNode)
-                node.render();
-        }
+        int index;
 
         foreach (GraphNode node in currentNode.getConnectedNodes())//Get the reference to the node that starts a ramification
         {
@@ -139,8 +131,9 @@ public class Grid_Generator : MonoBehaviour
                 node.unrender();
         }
 
-        GraphNode node1 = maze.getNodes()[maze.getNodes().IndexOf(currentNode) - 1];
-        GraphNode node2 = maze.getNodes()[maze.getNodes().IndexOf(currentNode)];
+
+        GraphNode node1 = maze.getNodes()[maze.getNodes().IndexOf(currentNode)];
+        GraphNode node2 = maze.getNodes()[maze.getNodes().IndexOf(currentNode) - 1];
         GraphConnection < GraphNode > connection = maze.findConnection(node1, node2);
 
         Debug.Log("Connection = " + connection);
@@ -150,22 +143,54 @@ public class Grid_Generator : MonoBehaviour
             auxGraphNode = aux;
         }
 
+        if (maze.getNodes()[maze.getNodes().IndexOf(currentNode) - 1].isRendered() || currentNode.getNodePosition() == GraphNode.nodePosition.F)
+            index = maze.getNodes().IndexOf(currentNode) - 1;
+        else
+            index = maze.getNodes().IndexOf(aux);
+
+        foreach(GraphNode node in maze.getNodes()[index].getConnectedNodes())
+        {
+            node.render();
+        }
+
         currentNode = aux;
         currentNodeTransform = currentNode.parent.transform;
     }
 
-    private void renderCurrentNodes()
+    private void updateNodesForward()
     {
+        GraphNode aux = new GraphNode();
         currentNode.render();
         currentNodeTransform = currentNode.parent.transform;
         foreach(GraphNode node in currentNode.getConnectedNodes())
         {
             node.render();
         }
-        
-        if(currentNode != maze.getNodes()[0])
+
+        foreach (GraphNode node in currentNode.getConnectedNodes())//Get the reference to the node that starts a ramification
         {
-            int index = maze.getNodes().IndexOf(currentNode) - 1;
+            GraphConnection<GraphNode> con = maze.findConnection(node, currentNode);
+            if (con.getNodeB() == currentNode)
+            {
+                aux = node;
+                break;
+            }
+        }
+
+        if (currentNode != maze.getNodes()[0])
+        {
+            int index;
+            if (aux == null)
+            {
+                Debug.Log("Aux no entra");
+                index = maze.getNodes().IndexOf(currentNode) - 1;
+            }
+            else
+            {
+                Debug.Log("Aux entra");
+                index = maze.getNodes().IndexOf(aux);
+            }
+
             foreach (GraphNode node in maze.getNodes()[index].getConnectedNodes())//Unrender nodes left behind
             {
                 if (node != currentNode)
@@ -867,10 +892,9 @@ public class Grid_Generator : MonoBehaviour
 
     private void initializeMaze()
     {
-        mazeSections = maze.getNodes();
-        currentNode = mazeSections[0];
-        currentNodeIndex = 0;
+        currentNode = maze.getNodes()[0];
         leaveCollisionDetected = false;
+        entryCollisionDetected = false;
     }
 }
 

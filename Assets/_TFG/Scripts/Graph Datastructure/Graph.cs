@@ -65,10 +65,15 @@ public class Graph<T> where T : GraphNode, new()
         return true;
     }
 
-    public void disconnectNodes(T nodeA, T nodeB)
+    public bool disconnectNodes(T nodeA, T nodeB)
     {
         GraphConnection<T> connection = new GraphConnection<T>(nodeA, nodeB);
-        disconnectNodes(connection);
+        if(connection != null)
+        {
+            disconnectNodes(connection);
+            return true;
+        }
+        return false;
     }
 
     public GraphConnection<T> findConnection(GraphConnection<T> connection)
