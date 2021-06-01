@@ -35,7 +35,13 @@ namespace TFG
         public void Start()
         {
             doTenTimes = 10;
-            collidable = false;
+            if(parentObject != null)
+            {
+                if (parentObject.name == "Entry Portal")
+                    collidable = false;
+                else
+                    collidable = true;
+            }
         }
 
         public void OnWillRenderObject()
