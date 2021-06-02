@@ -94,7 +94,6 @@ public class Grid_Generator : MonoBehaviour
                     currentNode = maze.getNodes()[maze.getNodes().IndexOf(currentNode) + 1];
                 }
             }
-
             updateNodesForward();
             connectCurrentNodes();
             leaveCollisionDetected = false;
@@ -103,7 +102,6 @@ public class Grid_Generator : MonoBehaviour
         if (entryCollisionDetected)
         {
             Debug.Log("Entry Collision Detected");
-
             updateNodesBackwards();
             connectCurrentNodes();
             entryCollisionDetected = false;
@@ -524,16 +522,16 @@ public class Grid_Generator : MonoBehaviour
         switch (currentNodeDirection)
         {
             case nodeDirection.Up:
-                resul = (int)playerCoordinates.x > 2;
+                resul = (int)playerCoordinates.x  - 1> 2;
                 break;
             case nodeDirection.Right:
-                resul = workSpace - (int)playerCoordinates.y + 1 > 2;
+                resul = workSpace - (int)playerCoordinates.y > 2;
                 break;
             case nodeDirection.Left:
-                resul = playerCoordinates.y > 2;
+                resul = playerCoordinates.y - 1> 2;
                 break;
             case nodeDirection.Bottom:
-                resul = workSpace - (int)playerCoordinates.x + 1 > 2;
+                resul = workSpace - (int)playerCoordinates.x > 2;
                 break;
         }
         return resul;
@@ -547,16 +545,16 @@ public class Grid_Generator : MonoBehaviour
         switch (currentNodeDirection)
         {
             case nodeDirection.Up:
-                resul = workSpace - playerCoordinates.x + 1 > 2;
+                resul = workSpace - playerCoordinates.x > 2;
                 break;
             case nodeDirection.Right:
-                resul = (int)playerCoordinates.y > 2;
+                resul = (int)playerCoordinates.y - 1> 2;
                 break;
             case nodeDirection.Left:
-                resul = workSpace - playerCoordinates.y + 1 > 2;
+                resul = workSpace - playerCoordinates.y > 2;
                 break;
             case nodeDirection.Bottom:
-                resul = (int)playerCoordinates.x > 2;
+                resul = (int)playerCoordinates.x  - 1> 2;
                 break;
         }
         return resul;
@@ -574,16 +572,16 @@ public class Grid_Generator : MonoBehaviour
         switch (currentNodeDirection)
         {
             case nodeDirection.Up:
-                resul = Random.Range(1, workSpace - (int)playerCoordinates.y + 1);
+                resul = Random.Range(2, workSpace - (int)playerCoordinates.y);
                 break;
             case nodeDirection.Right:
-                resul = Random.Range(1, workSpace - (int)playerCoordinates.x + 1);
+                resul = Random.Range(2, workSpace - (int)playerCoordinates.x);
                 break;
             case nodeDirection.Left:
-                resul = Random.Range(1, (int)playerCoordinates.x);
+                resul = Random.Range(2, (int)playerCoordinates.x - 1);
                 break;
             case nodeDirection.Bottom:
-                resul = Random.Range(1, (int)playerCoordinates.y);
+                resul = Random.Range(2, (int)playerCoordinates.y - 1);
                 break;
         }
         return resul;
@@ -591,7 +589,7 @@ public class Grid_Generator : MonoBehaviour
 
     private int generateRandomSideHallwayIndex(int straightHallwayLength)//Generate the point where the hallway turns, always less than the straight hallway length
     {
-        return Random.Range(1, straightHallwayLength + 1); //Side hallways have to be instantiated between the first and the last floor of the straight hallway
+        return Random.Range(2, straightHallwayLength + 1); //Side hallways have to be instantiated between the first and the last floor of the straight hallway
     }
 
     private List<SideHallway> generateFNodeSideHallways(int straightHallwayLength, string direction)
@@ -876,7 +874,7 @@ public class Grid_Generator : MonoBehaviour
     }
     private int getWorkSpace()//Returns the dimensions of the workSpace
     {
-        return 6;
+        return 7;
     }
 
     private void initializeGlobalVariables()

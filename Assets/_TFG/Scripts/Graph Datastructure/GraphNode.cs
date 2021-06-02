@@ -40,7 +40,7 @@ public class GraphNode
         this.leftHallways = leftHallways;
         this.nodePos = nodePos;
         nodeForm = setNodeType();
-        height = Random.Range(2, 6);
+        height = 3;
         color = new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), 1);
         portal = Resources.Load("Portal");
         leavePortals = new List<Transform>();
@@ -103,8 +103,8 @@ public class GraphNode
                     createWall(new Vector3(currentPos.x, currentPos.y + 1, currentPos.z), new Vector3(90, 0, 0), height);
                 else
                 {
-                    createWall(new Vector3(currentPos.x, currentPos.y + 2, currentPos.z), new Vector3(0, 90, 90), height - 2);
-                    createPortal(new Vector3(currentPos.x + 0.5f, currentPos.y + 0.5f, currentPos.z), Vector3.zero, 0);
+                    //createWall(new Vector3(currentPos.x, currentPos.y + 2, currentPos.z), new Vector3(0, 90, 90), height - 2);
+                    createPortal(new Vector3(currentPos.x + 0.5f, currentPos.y + 1, currentPos.z), Vector3.zero, 0);
                 }
             }
 
@@ -161,15 +161,15 @@ public class GraphNode
                         {
                             if (nodePos != nodePosition.F && !uniqueNode)//If this node isnt the last one or if this hallway is the main one, open the sidehallway with a portal
                             {
-                                createWall(new Vector3(currentPos.x - 0.5f, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
-                                hallways[h].setLeavePortal(createPortal(new Vector3(currentPos.x, currentPos.y + 0.5f, currentPos.z + 0.5f), leftPortalRotation, 1));
+                                //createWall(new Vector3(currentPos.x - 0.5f, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
+                                hallways[h].setLeavePortal(createPortal(new Vector3(currentPos.x, currentPos.y + 1, currentPos.z + 0.5f), leftPortalRotation, 1));
                             }
                             else if(nodeForm != nodeType.L)//If this node has ramifications
                             {
                                 if(!hallways[h].isMain())//If this hallway isnt the main one open a portal for the ramification
                                 {
-                                    createWall(new Vector3(currentPos.x - 0.5f, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
-                                    hallways[h].setLeavePortal(createPortal(new Vector3(currentPos.x, currentPos.y + 0.5f, currentPos.z + 0.5f), leftPortalRotation, 1));
+                                    //createWall(new Vector3(currentPos.x - 0.5f, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
+                                    hallways[h].setLeavePortal(createPortal(new Vector3(currentPos.x, currentPos.y + 1, currentPos.z + 0.5f), leftPortalRotation, 1));
                                 }
                                 else
                                 {
@@ -187,15 +187,15 @@ public class GraphNode
                         {
                             if (nodePos != nodePosition.F && !uniqueNode)
                             {
-                                createWall(new Vector3(currentPos.x + 1, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
-                                hallways[h].setLeavePortal(createPortal(new Vector3(currentPos.x + 1, currentPos.y + 0.5f, currentPos.z + 0.5f), rightPortalRotation, 1));
+                                //createWall(new Vector3(currentPos.x + 1, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
+                                hallways[h].setLeavePortal(createPortal(new Vector3(currentPos.x + 1, currentPos.y + 1, currentPos.z + 0.5f), rightPortalRotation, 1));
                             }
                             else if (nodeForm != nodeType.L)
                             {
                                 if (!hallways[h].isMain())
                                 {
-                                    createWall(new Vector3(currentPos.x + 1, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
-                                    hallways[h].setLeavePortal(createPortal(new Vector3(currentPos.x + 1, currentPos.y + 0.5f, currentPos.z + 0.5f), rightPortalRotation, 1));
+                                    //createWall(new Vector3(currentPos.x + 1, currentPos.y + 2, currentPos.z), new Vector3(0, 0, 90), height - 2);
+                                    hallways[h].setLeavePortal(createPortal(new Vector3(currentPos.x + 1, currentPos.y + 1, currentPos.z + 0.5f), rightPortalRotation, 1));
                                 }
                                 else
                                 {
@@ -509,5 +509,10 @@ public class GraphNode
         if (parent == null)
             return false;
         return true;
+    }
+
+    public int getStraightHallwayLength()
+    {
+        return straightHallwayLength;
     }
 }
