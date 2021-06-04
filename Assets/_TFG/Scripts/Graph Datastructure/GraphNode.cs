@@ -17,6 +17,9 @@ public class GraphNode
     protected List<SideHallway> rightHallways;//List of rightHallways of the node
     protected List<SideHallway> leftHallways;//List of leftHallways of the node
     public GameObject parent;//Empty GameObject to store the node
+    protected bool hasIndicator;
+    protected GameObject indicator;
+    protected bool indicatorActivated;
 
     protected Vector3 currentWorldCoordinates;//Store here the global position where the node should be instantiated (Basically its (0,0,0) coordinates)
     protected nodePosition nodePos;
@@ -80,11 +83,42 @@ public class GraphNode
             renderSideHallways(rightHallways);//Render right hallways
             renderSideHallways(leftHallways);//Render left hallways
         }
+        if (hasIndicator && indicator == null)//Generate the indicator if this is the start of the end of the maze
+        {
+            GameObject aux = GameObject.Instantiate((GameObject)Resources.Load("ActivateThis"));
+            aux.transform.parent = parent.transform;
+            aux.transform.position = currentWorldCoordinates;
+            aux.transform.position += (new Vector3(0.5f, 0.5f, 0.5f));
+
+            if (currentWorldCoordinates != Vector3.zero)//If its the end of the maze, move the indicator to the end of the hallway
+            {
+                aux.transform.position += new Vector3(0, 0, straightHallwayLength - 1);
+            }
+
+            if (indicatorActivated)//To maintain the state of the activation
+            {
+                aux.GetComponent<Light>().color = Color.green;
+                aux.GetComponent<MeshRenderer>().material = Resources.Load("Green", typeof(Material)) as Material;
+                Debug.Log(aux.GetComponent<Light>().color);
+            }
+
+            indicator = aux;
+        }
     }
     public void unrender()//Unrender this node
     {
+        if (hasIndicator)
+        {
+            if (indicator.GetComponent<Light>().color == Color.green)
+            {
+                Debug.Log("Set as activated");
+                indicatorActivated = true;
+            }
+        }
+       
         Object.Destroy(parent);
         parent = null;
+        indicator = null;
     }
     private void renderstraightHallway(int length)//Create the straight hallway of the node
     {
@@ -514,5 +548,15 @@ public class GraphNode
     public int getStraightHallwayLength()
     {
         return straightHallwayLength;
+    }
+
+    public Vector3 getWorldCoordinates()
+    {
+        return currentWorldCoordinates;
+    }
+
+    public void setIndicator()
+    {
+        hasIndicator = true;
     }
 }

@@ -125,7 +125,7 @@ public class Grid_Generator : MonoBehaviour
 
         foreach (GraphNode node in currentNode.getConnectedNodes())
         {
-            if (node != aux && node != currentNode)
+            if (node != aux && node != currentNode && currentNode.getNodePosition() != GraphNode.nodePosition.S)
                 node.unrender();
         }
 
@@ -229,11 +229,25 @@ public class Grid_Generator : MonoBehaviour
         node.render();
     }
 
+    private void generateStartAndEndIndicators(Graph<GraphNode> labyrinth)
+    {
+        List<GraphNode> nodes = labyrinth.getNodes();
+        Object indicator = Resources.Load("ActivateThis");
+
+        //Create the indicator for the first section, and turn the flag on so that it renders when the section respawns
+        nodes[0].setIndicator();
+
+        //Create the indicator for the last section, and turn the flag on so that it renders when the section respawns
+        nodes[labyrinth.getNumberOfNodes() - 1].setIndicator();
+    }
+
     public Graph<GraphNode> createLabyrinth(int mazeLength, Vector3 startingCoordinates)//Unify the main path with the ramifications
     {
         Graph<GraphNode> labyrinth;
 
         labyrinth = generateMaze(mazeLength, startingCoordinates);
+
+        generateStartAndEndIndicators(labyrinth);
 
         labyrinth.mergeGraph(auxRamificationGraph);
 
