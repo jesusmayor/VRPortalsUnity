@@ -29,20 +29,24 @@ public class GraphConnection<T> where T : GraphNode
 
     public void connectPortals()
     {
-        if (ramificationConnection)//If its a ramification connection, set the leave portal to the one connected to the ramification start node
+        if (nodeA != null && nodeB != null)
         {
-            nodeAPortal = nodeA.getNotMainHallwayPortal();
+            if (ramificationConnection)//If its a ramification connection, set the leave portal to the one connected to the ramification start node
+            {
+                nodeAPortal = nodeA.getNotMainHallwayPortal();
+            }
+            else//Set the leave portal to the main one
+            {
+                nodeAPortal = nodeA.getMainHallwayPortal();
+            }
+
+            nodeBPortal = nodeB.getEntryPortal();
+
+            Debug.Log("nodeAPortal = " + nodeAPortal);
+            Debug.Log("nodeBPortal = " + nodeBPortal);
+            nodeAPortal.GetComponent<PortalRender>().connectedPortal = nodeBPortal;
+            nodeBPortal.GetComponent<PortalRender>().connectedPortal = nodeAPortal;
         }
-        else//Set the leave portal to the main one
-        {
-            nodeAPortal = nodeA.getMainHallwayPortal();        }
-
-        nodeBPortal = nodeB.getEntryPortal();
-
-        Debug.Log("nodeAPortal = " + nodeAPortal);
-        Debug.Log("nodeBPortal = " + nodeBPortal);
-        nodeAPortal.GetComponent<PortalRender>().connectedPortal = nodeBPortal;
-        nodeBPortal.GetComponent<PortalRender>().connectedPortal = nodeAPortal;
     }
 
     public T getNodeA()

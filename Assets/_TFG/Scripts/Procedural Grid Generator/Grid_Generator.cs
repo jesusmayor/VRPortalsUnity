@@ -613,7 +613,7 @@ public class Grid_Generator : MonoBehaviour
         if (straightHallwayLength != 3)
         {
             currentNodeType = GraphNode.nodeType.F;
-            int firstIndex = Random.Range(1,straightHallwayLength/2);
+            int firstIndex = Random.Range(2,straightHallwayLength/2);
             int secondIndex = Random.Range(straightHallwayLength/2 + 1, straightHallwayLength + 1);
             
             SideHallway hallway1 = new SideHallway(direction, firstIndex, generateRandomSideHallwayLength());
@@ -624,14 +624,12 @@ public class Grid_Generator : MonoBehaviour
         }
         else
         {
-            SideHallway hallway1 = new SideHallway(direction, 1, generateRandomSideHallwayLength());
+            SideHallway hallway1 = new SideHallway(direction, 2, generateRandomSideHallwayLength());
             SideHallway hallway2 = new SideHallway(direction, 3, generateRandomSideHallwayLength());
 
             resul.Add(hallway1);
             resul.Add(hallway2);
         }
-
-
         return resul;
     }
 

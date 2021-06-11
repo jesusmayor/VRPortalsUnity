@@ -358,6 +358,7 @@ PrefabInstance:
     - {fileID: 1141440963928070911, guid: 14026e4771323774ba855cd99a036e85, type: 3}
     - {fileID: 7594262611650526758, guid: 14026e4771323774ba855cd99a036e85, type: 3}
     - {fileID: 8052519415986128442, guid: 14026e4771323774ba855cd99a036e85, type: 3}
+    - {fileID: 606840984200270776, guid: 14026e4771323774ba855cd99a036e85, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 14026e4771323774ba855cd99a036e85, type: 3}
 --- !u!1 &1039690724 stripped
 GameObject:
@@ -365,6 +366,19 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1009270590}
   m_PrefabAsset: {fileID: 0}
+--- !u!65 &1039690725
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1039690724}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.0001, y: 2, z: 0.0001}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!54 &1039690730
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -443,7 +457,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerStartPoint: {x: 1, y: 1}
-  mazeLength: 4
+  mazeLength: 100
   leaveCollisionDetected: 0
   entryCollisionDetected: 0
   currentPortalCollided: {fileID: 0}

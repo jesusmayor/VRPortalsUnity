@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using TFG;
 using UnityEditor;
 using UnityEngine;
-using System.Linq; 
-
+using System.Linq;
 
 public class GraphNode
 {
@@ -172,6 +171,7 @@ public class GraphNode
                 currentPos = currentWorldCoordinates;
                 int length = hallways[h].getHallwayLength();
                 int turnIndex = hallways[h].getTurnIndex();
+                SideHallway currentHallway = hallways[h];
                 if (direction == "right")//If direction is right, set up coordinates to instantiate the right hallway
                 {
                     currentPos.x++;
@@ -243,32 +243,86 @@ public class GraphNode
                     }
                     if (i == 0 && length != 0 && direction == "right")//To avoid overlapping of walls at the right hallway
                     {
-                        if (turnIndex != 1)
+                        if (turnIndex != 1 && nodeForm != nodeType.F)
                             createWall(new Vector3(currentPos.x + 0.5f, currentPos.y, currentPos.z), wallRotation, height);
+                        else if(nodeForm == nodeType.F)
+                        {
+                            
+                            if(fNodeHasContigousSideHallways(rightHallways[0], rightHallways[1]))//If the F section has contigous sideHallways
+                            {
+                                if(currentHallway == rightHallways[1])
+                                {
+                                    createWall(new Vector3 (currentPos.x, currentPos.y, currentPos.z + 0.05f), wallRotation, height, 0.95f);
+                                }
+                                else
+                                {
+                                    createWall(new Vector3(currentPos.x + 0.5f, currentPos.y, currentPos.z), wallRotation, height);
+                                }
+                            }
+                            else
+                            {
+                                createWall(new Vector3(currentPos.x + 0.5f, currentPos.y, currentPos.z), wallRotation, height);
+                            }
+                        }
+                        if(nodeForm == nodeType.F && fNodeHasContigousSideHallways(rightHallways[0], rightHallways[1]))
+                        {
+                            if(turnIndex != straightHallwayLength && currentHallway == rightHallways[1])
+                                createWall(new Vector3(currentPos.x + 0.5f, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+                            if (turnIndex == straightHallwayLength && currentHallway == rightHallways[1])
+                                createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+                        }
                         else
-                            createWall(currentPos, wallRotation, height);
-                        if (turnIndex != straightHallwayLength)
-                            createWall(new Vector3(currentPos.x + 0.5f, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
-                        else
-                            createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+                        {
+                            if (turnIndex != straightHallwayLength)
+                                createWall(new Vector3(currentPos.x + 0.5f, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+                            else
+                                createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+                        }
                     }
                     if (i == 0 && length != 0 && direction == "left")//To avoid overlapping of walls at the left hallway
                     {
-                        if (turnIndex != 1)
+                        if (turnIndex != 1 && nodeForm != nodeType.F)
                             createWall(new Vector3(currentPos.x - 0.5f, currentPos.y, currentPos.z), wallRotation, height);
+                        else if (nodeForm == nodeType.F)
+                        {
+                            if (fNodeHasContigousSideHallways(leftHallways[0], leftHallways[1]))//If the F section has contigous sideHallways
+                            {
+                                if (currentHallway == leftHallways[1])
+                                {
+                                    createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 0.05f), wallRotation, height, 0.95f);
+                                }
+                                else
+                                {
+                                    createWall(new Vector3(currentPos.x - 0.5f, currentPos.y, currentPos.z), wallRotation, height);
+                                }
+                            }
+                            else
+                            {
+                                createWall(new Vector3(currentPos.x - 0.5f, currentPos.y, currentPos.z), wallRotation, height);
+                            }
+                        }
                         else
                             createWall(currentPos, wallRotation, height);
-                        if (turnIndex != straightHallwayLength)
-                            createWall(new Vector3(currentPos.x - 0.5f, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+                        if (nodeForm == nodeType.F && fNodeHasContigousSideHallways(leftHallways[0], leftHallways[1]))
+                        {
+                            if (turnIndex != straightHallwayLength && currentHallway == leftHallways[1])
+                                createWall(new Vector3(currentPos.x - 0.5f, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+                            if (turnIndex == straightHallwayLength && currentHallway == leftHallways[1])
+                                createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+                        }
                         else
-                            createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+                        {
+                            if (turnIndex != straightHallwayLength)
+                                createWall(new Vector3(currentPos.x - 0.5f, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+                            else
+                                createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
+                        }
                     }
                     if (i != 0)//Basic case for wall creation
                     {
                         createWall(currentPos, wallRotation, height);
                         createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 1.5f), wallRotation, height);
                     }
-
 
                     if (direction == "right")
                     {
@@ -285,16 +339,16 @@ public class GraphNode
 
     private void createFloor(Vector3 pos, string name)
     {
-        GameObject floor = createSquare(pos,0.5f);
+        GameObject floor = createSquare(pos);
         floor.name = name;
     }
 
-    private void createWall(Vector3 pos, Vector3 rotation, int height)
+    private void createWall(Vector3 pos, Vector3 rotation, int height, float shrinkRatio = 0.5f)
     {
         int aux = 0;
         for(int i = 0; i< height; i++)
         {
-            GameObject wall = createSquare(new Vector3(pos.x, pos.y + aux, pos.z), 0.5f);
+            GameObject wall = createSquare(new Vector3(pos.x, pos.y + aux, pos.z), shrinkRatio);
             wall.transform.Rotate(rotation);
             wall.name = "Wall";
             aux += 1;
@@ -324,7 +378,7 @@ public class GraphNode
         return portalRef.transform;
     }
 
-    private GameObject createSquare(Vector3 pos, float shrinkRatio)//Create vertices and triangles arrays to make a 1^3 meter cube and instantiate it at the position given
+    private GameObject createSquare(Vector3 pos, float shrinkRatio = 0.5f)//Create vertices and triangles arrays to make a 1^3 meter cube and instantiate it at the position given
     {
         //Create the vertices and triangles arrays to create a square at (0,0,0) below the player
         Vector3[] vertices = new Vector3[] {
@@ -558,5 +612,24 @@ public class GraphNode
     public void setIndicator()
     {
         hasIndicator = true;
+    }
+
+    private bool fNodeHasContigousSideHallways(SideHallway hallway0, SideHallway hallway1)
+    {
+        int biggestIndex;
+        int lowestIndex;
+
+        if (hallway1.getTurnIndex() > hallway0.getTurnIndex())
+        {
+            biggestIndex = hallway1.getTurnIndex();
+            lowestIndex = hallway0.getTurnIndex();
+        }
+        else
+        {
+            biggestIndex = hallway0.getTurnIndex();
+            lowestIndex = hallway1.getTurnIndex();
+        }
+
+        return biggestIndex - lowestIndex == 1;
     }
 }
