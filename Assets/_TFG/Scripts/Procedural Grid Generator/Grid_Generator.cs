@@ -1,10 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml.Schema;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.MemoryProfiler;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 //This class is used to generate all of the grid in the scene. It generates it depending on the workSpace of the user to keep him inside its limits.
 public class Grid_Generator : MonoBehaviour
@@ -23,8 +19,8 @@ public class Grid_Generator : MonoBehaviour
     GraphNode.nodePosition currentNodePos;
     int currentNodeMainHallwayLength;
     bool first;//Used to know if a node is the first one or not
-    int mainYIndex;
-    int secondaryYIndex;
+    int mainYIndex;//Index of the main hallway
+    int secondaryYIndex;//Index of the not main hallway
     private int currentMainSideHallway;
     private bool isCurrentMainSideHallwayBiggest;
     private GraphNode ramificationStart;
@@ -369,17 +365,15 @@ public class Grid_Generator : MonoBehaviour
                     SideHallway leftHallway = new SideHallway("left", firstIndex, generateRandomSideHallwayLength());
 
                     //Create the second index for the second side hallway so it can never be the same as the first one
-                    if (firstIndex != straightHallwayLength && firstIndex != 1)
+                    if (firstIndex != straightHallwayLength)
                     {
-                        if (Random.Range(0, 2) == 0)
-                            secondIndex = Random.Range(1, firstIndex);
+                        if (Random.Range(0, 2) == 0 && firstIndex != 2)
+                            secondIndex = Random.Range(2, firstIndex);
                         else
                             secondIndex = Random.Range(firstIndex + 1, straightHallwayLength + 1);
                     }
-                    else if (firstIndex == 1)
-                        secondIndex = Random.Range(firstIndex + 1, straightHallwayLength + 1);
                     else
-                        secondIndex = Random.Range(1,straightHallwayLength);
+                        secondIndex = Random.Range(2,straightHallwayLength);
                  
 
                     SideHallway rightHallway = new SideHallway("right", secondIndex, generateRandomSideHallwayLength());
@@ -886,7 +880,7 @@ public class Grid_Generator : MonoBehaviour
     }
     private int getWorkSpace()//Returns the dimensions of the workSpace
     {
-        return 7;
+        return 8;
     }
 
     private void initializeGlobalVariables()

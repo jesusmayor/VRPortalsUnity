@@ -252,7 +252,7 @@ public class GraphNode
                             {
                                 if(currentHallway == rightHallways[1])
                                 {
-                                    createWall(new Vector3 (currentPos.x, currentPos.y, currentPos.z + 0.05f), wallRotation, height, 0.95f);
+                                    createWall(new Vector3 (currentPos.x, currentPos.y, currentPos.z + 0.025f), wallRotation, height, 0.95f);
                                 }
                                 else
                                 {
@@ -289,7 +289,7 @@ public class GraphNode
                             {
                                 if (currentHallway == leftHallways[1])
                                 {
-                                    createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 0.05f), wallRotation, height, 0.95f);
+                                    createWall(new Vector3(currentPos.x, currentPos.y, currentPos.z + 0.025f), wallRotation, height, 0.95f);
                                 }
                                 else
                                 {

@@ -456,8 +456,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb5cf0c0bcfb89946a61762ad3e634c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerStartPoint: {x: 1, y: 1}
-  mazeLength: 100
+  playerStartPoint: {x: 4, y: 1}
+  mazeLength: 10
   leaveCollisionDetected: 0
   entryCollisionDetected: 0
   currentPortalCollided: {fileID: 0}
