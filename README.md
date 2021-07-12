@@ -39,3 +39,5 @@ The procedural generator takes in some information and parameters to create the 
 * Max Ramification Length: Maximum number of sections of the ramifications created by T and F form sections.
 * WorkSpace: Dimensions of the workspace available by the user.
 * Player Start Point: Coordinates of the start point within the workspace.
+
+Its important to notice that the more space available, the most randomness you can get from the generator.
