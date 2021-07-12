@@ -32,7 +32,7 @@ The maze is generated dinamically as the user explores the maze, rendering only 
 The procedural generator takes in some information and parameters to create the enviroment:
 
 <p align="center">
-  <img width="500" height="200" src="/Images/Options.png">
+  <img width="700" height="200" src="/Images/Options.png">
 </p>
 
 * Maze Length: Number of sections to generate. These sections form the maze as a whole.
