@@ -5,8 +5,8 @@ using UnityEngine;
 //This class is used to generate all of the grid in the scene. It generates it depending on the workSpace of the user to keep him inside its limits.
 public class Grid_Generator : MonoBehaviour
 {
-    public int maxRamificationLength;
     public int mazeLength;
+    public int maxRamificationLength;
     public Vector2 workSpace;
     public Vector2 playerStartPoint;
     private Vector3 playerCoordinates;//Used to track the position of the player
@@ -309,7 +309,7 @@ public class Grid_Generator : MonoBehaviour
         return maze;
     }
 
-    private List<List<SideHallway>> randomNode()//Takes work space limitation into account
+    private List<List<SideHallway>> randomNode()//Generates a random node taking into account the workspace limitation and updates the coordinates for the next one
     {
         List<List<SideHallway>> resul = new List<List<SideHallway>>();
         int x = 0;//x movement generated
@@ -429,11 +429,6 @@ public class Grid_Generator : MonoBehaviour
             }
         }
 
-        //Debugs to see how conditions are working
-        //Debug.Log("Main hallway = " + straightHallwayLength);
-        //Debug.Log("CurrentNodeDirection = "+ currentNodeDirection);
-        //Debug.Log("turnDecision = " + turnDecision);
-
         if ((canTurnLeft() && !canTurnRight()) && !alreadyTurned || turnDecision == 0) //Turn to the left
         {
             nodeTypeDecision = Random.Range(0, 2);
@@ -510,7 +505,7 @@ public class Grid_Generator : MonoBehaviour
             Debug.Log("Right");
 
             x = rightHallways[mainSideHallway].getHallwayLength();//x generated equals the length of the side hallway
-            y = rightHallways[mainSideHallway].getTurnIndex();
+            y = rightHallways[mainSideHallway].getTurnIndex();//y generated is equal to the point where the side hallway is created
 
             nodeDirectionAux = currentNodeDirection;
 
@@ -529,7 +524,7 @@ public class Grid_Generator : MonoBehaviour
         return resul;
     }
 
-    private bool canTurnLeft()
+    private bool canTurnLeft()//True if section can turn left
     {
         bool resul = false;
         int workspace;
@@ -560,7 +555,7 @@ public class Grid_Generator : MonoBehaviour
         return resul;
     }
 
-    private bool canTurnRight()
+    private bool canTurnRight()//True if section can turn right
     {
         bool resul = false;
         int workspace;
@@ -629,7 +624,7 @@ public class Grid_Generator : MonoBehaviour
         return Random.Range(2, straightHallwayLength + 1); //Side hallways have to be instantiated between the first and the last floor of the straight hallway
     }
 
-    private List<SideHallway> generateFNodeSideHallways(int straightHallwayLength, string direction)
+    private List<SideHallway> generateFNodeSideHallways(int straightHallwayLength, string direction)//Generate the side hallways for a F form node
     {
         List<SideHallway> resul = new List<SideHallway>();
 
@@ -656,7 +651,7 @@ public class Grid_Generator : MonoBehaviour
         return resul;
     }
 
-    private void updateCoordinatesForLeftTurn(int x, int y)
+    private void updateCoordinatesForLeftTurn(int x, int y)//Updates coordinates when section turns left
     {
         if (!first)//If its not the first node, set the coordinates depending on the direction
         {
@@ -694,7 +689,7 @@ public class Grid_Generator : MonoBehaviour
         }
     }
 
-    private void updateCoordinatesForRightTurn(int x, int y)
+    private void updateCoordinatesForRightTurn(int x, int y)//Updates coordinates when section turns right
     {
         if (!first)
         {
@@ -732,7 +727,7 @@ public class Grid_Generator : MonoBehaviour
         }
     }
 
-    private bool multipleSideHallwayNodeFits(int straightHallwayLength)
+    private bool multipleSideHallwayNodeFits(int straightHallwayLength)//True if a node that creates ramifications can be created
     {
         bool resul = false;
 
@@ -742,7 +737,7 @@ public class Grid_Generator : MonoBehaviour
         return resul;
     }
 
-    private Graph<GraphNode> generateNewPathForTNode()
+    private Graph<GraphNode> generateNewPathForTNode()//Generates a ramification for T nodes
     {
         Vector3 auxCoord = playerCoordinates;
         nodeDirection directionAux = currentNodeDirection;
@@ -844,7 +839,7 @@ public class Grid_Generator : MonoBehaviour
         return auxGraph;
     }
 
-    private Graph<GraphNode> generateNewPathForFNode()
+    private Graph<GraphNode> generateNewPathForFNode()//Generates a ramification for F nodes
     {
         Vector3 auxCoord = playerCoordinates;
         nodeDirection directionAux = currentNodeDirection;

@@ -5,6 +5,8 @@ using UnityEditor;
 using UnityEngine;
 using System.Linq;
 
+//This class is used to store the characterisics of the sections that form the maze. It is also used to render or unrender each section separately.
+
 public class GraphNode
 {
     protected Object portal;//Reference to the prefab
@@ -15,7 +17,7 @@ public class GraphNode
     protected List<Transform> leavePortals;//List of portals used to leave the node
     protected List<SideHallway> rightHallways;//List of rightHallways of the node
     protected List<SideHallway> leftHallways;//List of leftHallways of the node
-    private GameObject parent;//Empty GameObject to store the node
+    protected GameObject parent;//Empty GameObject to store the node
     protected bool hasIndicator;
     protected GameObject indicator;
     protected bool indicatorActivated;
@@ -524,7 +526,7 @@ public class GraphNode
         return leftHallways;
     }
 
-    public Transform getMainHallwayPortal()
+    public Transform getMainHallwayPortal()//Gets the reference to the main portal of the section
     {
         if(nodeForm == nodeType.L)
         {
@@ -559,7 +561,7 @@ public class GraphNode
         }
     }
 
-    public Transform getNotMainHallwayPortal()
+    public Transform getNotMainHallwayPortal()//Gets the reference to the non main portal of the section
     {
         if (nodeForm == nodeType.F)
         {
@@ -603,18 +605,12 @@ public class GraphNode
     {
         return straightHallwayLength;
     }
-
-    public Vector3 getWorldCoordinates()
-    {
-        return currentWorldCoordinates;
-    }
-
     public void setIndicator()
     {
         hasIndicator = true;
     }
 
-    private bool fNodeHasContigousSideHallways(SideHallway hallway0, SideHallway hallway1)
+    private bool fNodeHasContigousSideHallways(SideHallway hallway0, SideHallway hallway1)//True if this is an F node and the sidehallways are contiguous.
     {
         int biggestIndex;
         int lowestIndex;

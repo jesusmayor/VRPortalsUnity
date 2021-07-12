@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//This class is used to store the maze generated as a whole.
 public class Graph<T> where T : GraphNode, new()
 {
     protected List<GraphNode> nodes;

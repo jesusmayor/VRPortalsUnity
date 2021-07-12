@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using TFG;
 
+//This class is used to store connections between nodes and connect portals between the sections.
+
 public class GraphConnection<T> where T : GraphNode
 {
     protected T nodeA;
@@ -27,7 +29,7 @@ public class GraphConnection<T> where T : GraphNode
         ramificationConnection = true;
     }
 
-    public void connectPortals()
+    public void connectPortals()//Connects the portal of nodeA with the portal of nodeB.
     {
         if (nodeA != null && nodeB != null)
         {
