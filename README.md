@@ -8,21 +8,32 @@ To accomplish this, partially non euclidean enviroments are used. The maze is ge
 
 The mazes generated are stored in a data structure that works as a graph but provides tool to manipulate them as needed.
 
-(Foto de Portales)
+<p align="center">
+  <img width="350" height="300" src="/Images/portales.png">
+</p>
 
-The sections generated have L,T or F forms, where T and F sections generate new ramifications since they have several exits. 
+The sections generated have L,T or F forms, where T and F sections generate new ramifications since they have several exits. In the image below a F shaped node and the visualizations of the sections connected can be seen.
 
-(Foto de seccion y visualización de los portales)
+<table width = "100%" align = "center">
+  <tr>
+    <td width = "50%" style = "text-align:left"> <img src="/Images/Gameplay_Example.png" width="350" height = "300"/></td>
+    <td width = "50%" style = "text-align:right"> <img src="/Images/Both_Hallways.png" width="350" height = "300"/></td>
+  </tr>
+</table>
 
 The maze is generated dinamically as the user explores the maze, rendering only the sections needed at each moment to improve performance. They are rendered in different points of the scene to avoid section overlapping.
 
-(Foto del laberinto desde arriba)
+<p align="center">
+  <img width="650" height="350" src="/Images/Full_Maze_Eng.png">
+</p>
 
 ## How to set
 
 The procedural generator takes in some information and parameters to create the enviroment:
 
-(Foto de las opciones)
+<p align="center">
+  <img width="500" height="200" src="/Images/Options.png">
+</p>
 
 * Maze Length: Number of sections to generate. These sections form the maze as a whole.
 * Max Ramification Length: Maximum number of sections of the ramifications created by T and F form sections.
