@@ -15,7 +15,7 @@ public class GraphNode
     protected List<Transform> leavePortals;//List of portals used to leave the node
     protected List<SideHallway> rightHallways;//List of rightHallways of the node
     protected List<SideHallway> leftHallways;//List of leftHallways of the node
-    public GameObject parent;//Empty GameObject to store the node
+    private GameObject parent;//Empty GameObject to store the node
     protected bool hasIndicator;
     protected GameObject indicator;
     protected bool indicatorActivated;

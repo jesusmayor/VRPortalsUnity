@@ -12,7 +12,6 @@ namespace TFG
         //Nodo al que pertenece el portal
         public GameObject parentObject;
 
-        public bool collidable;
         //destino al que se teletransporta. Puede ser cualquier Transform, pero en el caso de los portales suele ser otro portal
         public Transform connectedPortal;
         //referencia local al material para acelerar las operaciones
@@ -35,13 +34,6 @@ namespace TFG
         public void Start()
         {
             doTenTimes = 10;
-            if(parentObject != null)
-            {
-                if (parentObject.name == "Entry Portal")
-                    collidable = false;
-                else
-                    collidable = true;
-            }
         }
 
         public void OnWillRenderObject()

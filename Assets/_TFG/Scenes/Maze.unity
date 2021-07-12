@@ -377,7 +377,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.0001, y: 2, z: 0.0001}
+  m_Size: {x: 1e-16, y: 1e-16, z: 1e-16}
   m_Center: {x: 0, y: 1, z: 0}
 --- !u!54 &1039690730
 Rigidbody:
@@ -456,12 +456,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb5cf0c0bcfb89946a61762ad3e634c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxRamificationLength: 6
+  mazeLength: 1000
+  workSpace: {x: 8, y: 8}
   playerStartPoint: {x: 4, y: 1}
-  mazeLength: 10
   leaveCollisionDetected: 0
   entryCollisionDetected: 0
   currentPortalCollided: {fileID: 0}
-  currentNodeTransform: {fileID: 0}
 --- !u!4 &1650157956 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1266507020059838737, guid: 14026e4771323774ba855cd99a036e85,

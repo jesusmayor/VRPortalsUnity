@@ -5,11 +5,11 @@ using TFG;
 
 public class GraphConnection<T> where T : GraphNode
 {
-    private T nodeA;
-    private T nodeB;
-    private Transform nodeAPortal;
-    private Transform nodeBPortal;
-    private bool ramificationConnection;
+    protected T nodeA;
+    protected T nodeB;
+    protected Transform nodeAPortal;
+    protected Transform nodeBPortal;
+    protected bool ramificationConnection;
 
     public GraphConnection(T nodeA, T nodeB)
     {

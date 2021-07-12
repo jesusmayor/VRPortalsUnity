@@ -5,13 +5,14 @@ using UnityEngine;
 //This class is used to generate all of the grid in the scene. It generates it depending on the workSpace of the user to keep him inside its limits.
 public class Grid_Generator : MonoBehaviour
 {
-    public Vector2 playerStartPoint;
+    public int maxRamificationLength;
     public int mazeLength;
+    public Vector2 workSpace;
+    public Vector2 playerStartPoint;
     private Vector3 playerCoordinates;//Used to track the position of the player
     private Vector3 startingCoordinates;//Used to track the global coordinates of the nodes
     private int nodeOffset;//X axis offset between nodes
     private int zAxisOffset;
-    private int workSpace;//Dimensions of the work space
     private enum nodeDirection { Up, Right, Left, Bottom };//Possible directions of a node
     private nodeDirection currentNodeDirection;//Used to keep track of the direction of the nodes
     private nodeDirection nodeDirectionAux;
@@ -26,11 +27,13 @@ public class Grid_Generator : MonoBehaviour
     private GraphNode ramificationStart;
     private GraphNode currentNode;
     private Graph<GraphNode> maze;
+    [HideInInspector]
     public bool leaveCollisionDetected;
+    [HideInInspector]
     public bool entryCollisionDetected;
+    [HideInInspector]
     public Transform currentPortalCollided;
     private Graph<GraphNode> auxRamificationGraph = new Graph<GraphNode>();
-    public Transform currentNodeTransform;//Only used for debugging
     private GraphNode auxGraphNode;
 
     private void Start()
@@ -148,14 +151,12 @@ public class Grid_Generator : MonoBehaviour
         }
 
         currentNode = aux;
-        currentNodeTransform = currentNode.parent.transform;
     }
 
     private void updateNodesForward()
     {
         GraphNode aux = new GraphNode();
         currentNode.render();
-        currentNodeTransform = currentNode.parent.transform;
         foreach(GraphNode node in currentNode.getConnectedNodes())
         {
             node.render();
@@ -206,23 +207,6 @@ public class Grid_Generator : MonoBehaviour
         {
             connection.connectPortals();
         }
-    }
-
-    private void exampleNode()
-    {
-        List<SideHallway> rightHallways = new List<SideHallway>();
-        SideHallway rightHallway1 = new SideHallway("right", 3, 2);
-        SideHallway rightHallway2 = new SideHallway("right", 5, 2);
-        rightHallways.Add(rightHallway1);
-        rightHallways.Add(rightHallway2);
-
-        List<SideHallway> leftHallways = new List<SideHallway>();
-        SideHallway leftHallway1 = new SideHallway("left", 5, 2);
-        SideHallway leftHallway2 = new SideHallway("left", 7, 3);
-        leftHallways.Add(leftHallway1);
-        leftHallways.Add(leftHallway2);
-        GraphNode node = new GraphNode(Vector3.zero, 7, rightHallways, leftHallways, GraphNode.nodePosition.S);
-        node.render();
     }
 
     private void generateStartAndEndIndicators(Graph<GraphNode> labyrinth)
@@ -279,7 +263,7 @@ public class Grid_Generator : MonoBehaviour
 
             Debug.Log("Node number " + i + " Player Coordinates = " + playerCoordinates.x + "," + playerCoordinates.y);
             Debug.Log("Node position = " + nodePos);
-            if (playerCoordinates.x < 1 || playerCoordinates.x > workSpace || playerCoordinates.y < 1 || playerCoordinates.y > workSpace)
+            if (isOutOfBounds())
                 Debug.LogError("Out of work space");
             sideHallways = randomNode();
             Debug.Log("Node type = " + currentNodeType);
@@ -336,7 +320,7 @@ public class Grid_Generator : MonoBehaviour
         int nodeTypeDecision;
         int straightHallwayLength;
         int mainSideHallway = -1;
-        int secondaryHallway = -1;
+        int secondaryHallway;
         bool alreadyTurned = false;//Used to force algorythm stop after deciding a T node
 
         straightHallwayLength = generateRandomHallwayLength();//Generate the main hallway length
@@ -348,33 +332,55 @@ public class Grid_Generator : MonoBehaviour
 
         if (canTurnLeft() && canTurnRight())//If node can turn in both directions, turn to both or to a random one or both
         {
-            if(Random.Range(0,2) == 0)
+            if(Random.Range(0,4) == 0)
             {
                 turnDecision = Random.Range(0, 2);
             }
-            else
+            else//Node generated is T form
             {
-                if (multipleSideHallwayNodeFits(straightHallwayLength))//Node generated is T form
+                if (straightHallwayLength > 3)
                 {
                     alreadyTurned = true;
-                    int firstIndex = generateRandomSideHallwayIndex(straightHallwayLength);
+                    int firstIndex;
                     int secondIndex;
+                    int aux = -1;
                     mainSideHallway = Random.Range(0,2);
                     currentMainSideHallway = mainSideHallway;
                     currentNodeType = GraphNode.nodeType.T;
+
+                    if(straightHallwayLength == 4)
+                    {
+                        if(Random.Range(0,2) == 0)
+                        {
+                            firstIndex = 2;
+                            aux = 4;
+                        }
+                        else
+                        {
+                            firstIndex = 4;
+                            aux = 2;
+                        }
+                    }
+                    else
+                        firstIndex = generateRandomSideHallwayIndex(straightHallwayLength);
+
                     SideHallway leftHallway = new SideHallway("left", firstIndex, generateRandomSideHallwayLength());
 
                     //Create the second index for the second side hallway so it can never be the same as the first one
-                    if (firstIndex != straightHallwayLength)
+                    if (straightHallwayLength != 4)
                     {
-                        if (Random.Range(0, 2) == 0 && firstIndex != 2)
-                            secondIndex = Random.Range(2, firstIndex);
+                        if (firstIndex + 2 < straightHallwayLength)
+                        {
+                            if (Random.Range(0, 2) == 0 && firstIndex > 3)
+                                secondIndex = Random.Range(2, firstIndex - 2);
+                            else
+                                secondIndex = Random.Range(firstIndex + 2, straightHallwayLength + 1);
+                        }
                         else
-                            secondIndex = Random.Range(firstIndex + 1, straightHallwayLength + 1);
+                            secondIndex = Random.Range(2, straightHallwayLength - 1);
                     }
                     else
-                        secondIndex = Random.Range(2,straightHallwayLength);
-                 
+                        secondIndex = aux;
 
                     SideHallway rightHallway = new SideHallway("right", secondIndex, generateRandomSideHallwayLength());
 
@@ -526,6 +532,15 @@ public class Grid_Generator : MonoBehaviour
     private bool canTurnLeft()
     {
         bool resul = false;
+        int workspace;
+
+        if (currentNodeDirection == nodeDirection.Left || currentNodeDirection == nodeDirection.Right)
+        {
+            workspace = (int)workSpace.y;
+        }
+        else
+            workspace = (int)workSpace.x;
+
 
         switch (currentNodeDirection)
         {
@@ -533,13 +548,13 @@ public class Grid_Generator : MonoBehaviour
                 resul = (int)playerCoordinates.x  - 1> 2;
                 break;
             case nodeDirection.Right:
-                resul = workSpace - (int)playerCoordinates.y > 2;
+                resul = workspace - (int)playerCoordinates.y > 2;
                 break;
             case nodeDirection.Left:
                 resul = playerCoordinates.y - 1> 2;
                 break;
             case nodeDirection.Bottom:
-                resul = workSpace - (int)playerCoordinates.x > 2;
+                resul = workspace - (int)playerCoordinates.x > 2;
                 break;
         }
         return resul;
@@ -548,18 +563,25 @@ public class Grid_Generator : MonoBehaviour
     private bool canTurnRight()
     {
         bool resul = false;
+        int workspace;
 
+        if (currentNodeDirection == nodeDirection.Left || currentNodeDirection == nodeDirection.Right)
+        {
+            workspace = (int)workSpace.y;
+        }
+        else
+            workspace = (int)workSpace.x;
 
         switch (currentNodeDirection)
         {
             case nodeDirection.Up:
-                resul = workSpace - playerCoordinates.x > 2;
+                resul = workspace - playerCoordinates.x > 2;
                 break;
             case nodeDirection.Right:
                 resul = (int)playerCoordinates.y - 1> 2;
                 break;
             case nodeDirection.Left:
-                resul = workSpace - playerCoordinates.y > 2;
+                resul = workspace - playerCoordinates.y > 2;
                 break;
             case nodeDirection.Bottom:
                 resul = (int)playerCoordinates.x  - 1> 2;
@@ -577,13 +599,20 @@ public class Grid_Generator : MonoBehaviour
     private int generateRandomHallwayLength()//Generates the length of the main hallway
     {
         int resul = -1;
+        int workspace;
+        if (currentNodeDirection == nodeDirection.Left || currentNodeDirection == nodeDirection.Right)
+        {
+            workspace = (int)workSpace.x;
+        }
+        else
+            workspace = (int)workSpace.y;
         switch (currentNodeDirection)
         {
             case nodeDirection.Up:
-                resul = Random.Range(2, workSpace - (int)playerCoordinates.y);
+                resul = Random.Range(2, workspace - (int)playerCoordinates.y);
                 break;
             case nodeDirection.Right:
-                resul = Random.Range(2, workSpace - (int)playerCoordinates.x);
+                resul = Random.Range(2, workspace - (int)playerCoordinates.x);
                 break;
             case nodeDirection.Left:
                 resul = Random.Range(2, (int)playerCoordinates.x - 1);
@@ -806,7 +835,7 @@ public class Grid_Generator : MonoBehaviour
 
         Debug.Log("Starting Path with coordinates = " + playerCoordinates);
         zAxisOffset += 10;
-        auxGraph = generateMaze(Random.Range(1, 6), new Vector3(startingCoordinates.x, startingCoordinates.y, startingCoordinates.z + zAxisOffset));
+        auxGraph = generateMaze(Random.Range(1, maxRamificationLength), new Vector3(startingCoordinates.x, startingCoordinates.y, startingCoordinates.z + zAxisOffset));
         playerCoordinates = auxCoord;
         currentNodeDirection = directionAux;
         currentNodeType = auxNodeType;
@@ -870,7 +899,7 @@ public class Grid_Generator : MonoBehaviour
         Debug.Log("Starting Path with coordinates = " + playerCoordinates);
         Debug.Log("Difference = " + difference);
         zAxisOffset += 10;
-        auxGraph = generateMaze(Random.Range(1,6), new Vector3(startingCoordinates.x, startingCoordinates.y, startingCoordinates.z + zAxisOffset));
+        auxGraph = generateMaze(Random.Range(1,maxRamificationLength), new Vector3(startingCoordinates.x, startingCoordinates.y, startingCoordinates.z + zAxisOffset));
         playerCoordinates = auxCoord;
         currentNodeDirection = directionAux;
         currentNodeType = auxNodeType;
@@ -878,14 +907,9 @@ public class Grid_Generator : MonoBehaviour
 
         return auxGraph;
     }
-    private int getWorkSpace()//Returns the dimensions of the workSpace
-    {
-        return 8;
-    }
 
     private void initializeGlobalVariables()
     {
-        workSpace = getWorkSpace();
         playerCoordinates = playerStartPoint;//Sets the coordinates to the starting point
         startingCoordinates = Vector3.zero;
         nodeOffset = 10;
@@ -899,6 +923,13 @@ public class Grid_Generator : MonoBehaviour
         currentNode = maze.getNodes()[0];
         leaveCollisionDetected = false;
         entryCollisionDetected = false;
+    }
+    
+    private bool isOutOfBounds()
+    {
+        if (playerCoordinates.x < 1 || playerCoordinates.x > workSpace.x || playerCoordinates.y < 1 || playerCoordinates.y > workSpace.y)
+            return true;
+        return false;
     }
 }
 

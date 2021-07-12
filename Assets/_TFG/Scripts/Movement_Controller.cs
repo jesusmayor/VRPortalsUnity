@@ -33,32 +33,15 @@ public class Movement_Controller : MonoBehaviour
     {
         if(col.gameObject.name == "Leave Portal")
         {
-            if(col.GetComponent<PortalRender>().collidable == true)
-            {
-                Debug.Log("Collided with a leave portal");
-                col.GetComponent<PortalRender>().collidable = false;
-                grid_generator.leaveCollisionDetected = true;
-                grid_generator.currentPortalCollided = col.transform;
-            }
-            else
-            {
-                col.GetComponent<PortalRender>().collidable = true;
-            }
+            Debug.Log("Collided with a leave portal");
+            grid_generator.leaveCollisionDetected = true;
+            grid_generator.currentPortalCollided = col.transform;
         }
         else if(col.gameObject.name == "Entry Portal")
         {
-            if(col.GetComponent<PortalRender>().collidable == true)//To avoid entry portal to read collision at the teleport time
-            {
-                Debug.Log("Portal collidable, updating nodes...");
-                col.GetComponent<PortalRender>().collidable = false;
-                grid_generator.entryCollisionDetected = true;
-                grid_generator.currentPortalCollided = col.transform;
-            }
-            else
-            {
-                Debug.Log("Portal not collidable yet.");
-                col.GetComponent<PortalRender>().collidable = true;
-            }
+            Debug.Log("Portal collidable, updating nodes...");
+            grid_generator.entryCollisionDetected = true;
+            grid_generator.currentPortalCollided = col.transform;
         }
     }
 }
