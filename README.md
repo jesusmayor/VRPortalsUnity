@@ -16,8 +16,8 @@ The sections generated have L,T or F forms, where T and F sections generate new 
 
 <table width = "100%" align = "center">
   <tr>
-    <td width = "50%" style = "text-align:left"> <img src="/Images/Gameplay_Example.png" width="350" height = "300"/></td>
-    <td width = "50%" style = "text-align:right"> <img src="/Images/Both_Hallways.png" width="350" height = "300"/></td>
+    <td width = "50%" style = "text-align:left"> <img src="/Images/Gameplay_Example.png" width="400" height = "300"/></td>
+    <td width = "50%" style = "text-align:right"> <img src="/Images/Both_Hallways.png" width="400" height = "300"/></td>
   </tr>
 </table>
 
